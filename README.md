@@ -80,28 +80,6 @@ The app requires permission to put your Mac to sleep. On first use, macOS may pr
 - Runs as menu bar only application (no dock icon)
 - Minimal resource usage
 
-## Development
-
-### Project Structure
-
-```
-sleep-timer-app/
-├── Package.swift           # Swift Package Manager configuration
-├── Sources/
-│   ├── SleepTimerApp.swift    # Main app entry point and menu bar setup
-│   ├── TimerManager.swift     # Timer logic and sleep command
-│   └── ContentView.swift      # SwiftUI user interface
-└── README.md
-```
-
-### Key Components
-
-- **SleepTimerApp**: Main app structure with AppDelegate for menu bar
-- **TimerManager**: Singleton managing timer state and sleep functionality
-- **ContentView**: SwiftUI views for timer interface
-- **InactiveTimerView**: Timer setup interface
-- **ActiveTimerView**: Active timer with progress and controls
-
 ## Releases
 
 To create a new release with automatic app building:
@@ -134,16 +112,6 @@ MIT License - feel free to use this project for personal or commercial purposes.
 **App doesn't appear in menu bar:**
 - Check that you're running macOS 13.0 or later
 - Try quitting and restarting the application
-
-## Future Enhancements
-
-- [ ] Custom alert sound before sleep
-- [ ] Keyboard shortcuts
-- [ ] Launch at login option
-- [ ] Sleep schedule presets
-- [ ] Dark mode support
-- [ ] Notifications before sleep
-- [ ] Statistics tracking
 
 ## Credits
 

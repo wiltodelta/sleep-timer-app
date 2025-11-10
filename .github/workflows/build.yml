@@ -27,18 +27,17 @@ jobs:
         chmod +x create-app.sh
         ./create-app.sh
     
-    - name: Compress App Bundle
-      run: |
-        cd "Sleep Timer.app"
-        zip -r "../Sleep-Timer-macOS.zip" .
-        cd ..
-    
     - name: Upload App Bundle
       uses: actions/upload-artifact@v4
       with:
         name: Sleep-Timer-macOS
-        path: Sleep-Timer-macOS.zip
+        path: Sleep Timer.app
         retention-days: 30
+    
+    - name: Compress for Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        ditto -c -k --sequesterRsrc --keepParent "Sleep Timer.app" "Sleep-Timer-macOS.zip"
     
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/v')

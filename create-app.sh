@@ -63,6 +63,12 @@ cat > "$APP_DIR/Contents/Info.plist" << EOF
 EOF
 
 echo "✅ App bundle created successfully: $APP_DIR"
+
+# Remove quarantine attribute
+echo "🔓 Removing quarantine attribute..."
+xattr -cr "$APP_DIR"
+echo "✅ App is ready to use"
+
 echo ""
 echo "To install, drag '$APP_DIR' to your Applications folder or run:"
 echo "  mv '$APP_DIR' /Applications/"

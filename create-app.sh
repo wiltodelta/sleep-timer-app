@@ -64,9 +64,16 @@ EOF
 
 echo "✅ App bundle created successfully: $APP_DIR"
 
-# Remove quarantine attribute
-echo "🔓 Removing quarantine attribute..."
-xattr -cr "$APP_DIR"
+# Try to code sign
+CERT_NAME="Victor Kuznetsov"
+echo "🔐 Attempting to sign app..."
+if codesign --force --sign "$CERT_NAME" --deep "$APP_DIR" 2>/dev/null; then
+    echo "✅ App signed successfully with '$CERT_NAME'"
+else
+    echo "⚠️  Code signing failed, removing quarantine attribute instead..."
+    xattr -cr "$APP_DIR"
+fi
+
 echo "✅ App is ready to use"
 
 echo ""

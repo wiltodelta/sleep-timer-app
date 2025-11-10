@@ -64,17 +64,9 @@ EOF
 
 echo "✅ App bundle created successfully: $APP_DIR"
 
-# Try to code sign
-CERT_NAME="Victor Kuznetsov"
-echo "🔐 Attempting to sign app..."
-if codesign --force --sign "$CERT_NAME" --deep "$APP_DIR" 2>/dev/null; then
-    echo "✅ App signed successfully with '$CERT_NAME'"
-else
-    echo "ℹ️  No code signing certificate found (this is OK for GitHub Actions)"
-fi
-
 # Remove quarantine attribute if running locally (not in CI)
 if [ -z "$CI" ]; then
+    echo "🔓 Removing quarantine attribute..."
     xattr -cr "$APP_DIR" 2>/dev/null || true
 fi
 

@@ -70,8 +70,12 @@ echo "🔐 Attempting to sign app..."
 if codesign --force --sign "$CERT_NAME" --deep "$APP_DIR" 2>/dev/null; then
     echo "✅ App signed successfully with '$CERT_NAME'"
 else
-    echo "⚠️  Code signing failed, removing quarantine attribute instead..."
-    xattr -cr "$APP_DIR"
+    echo "ℹ️  No code signing certificate found (this is OK for GitHub Actions)"
+fi
+
+# Remove quarantine attribute if running locally (not in CI)
+if [ -z "$CI" ]; then
+    xattr -cr "$APP_DIR" 2>/dev/null || true
 fi
 
 echo "✅ App is ready to use"

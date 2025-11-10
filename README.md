@@ -27,9 +27,14 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 1. Go to [Actions](https://github.com/wiltodelta/sleep-timer-app/actions) tab
 2. Click on the latest successful build
 3. Download `Sleep-Timer-macOS` artifact
-4. Unzip and move `Sleep Timer.app` to Applications folder
+4. Unzip the downloaded file
+5. **Important**: Remove the quarantine attribute:
+   ```bash
+   xattr -cr "Sleep Timer.app"
+   ```
+6. Move `Sleep Timer.app` to Applications folder
 
-> **Note**: You may need to right-click the app and select "Open" the first time due to macOS Gatekeeper.
+> **Note**: The app is not notarized by Apple, so you need to remove the quarantine attribute or right-click and select "Open" the first time.
 
 ### Option 2: Building from Source
 

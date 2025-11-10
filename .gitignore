@@ -1,0 +1,31 @@
+# Xcode
+.DS_Store
+.build/
+.swiftpm/
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# Swift Package Manager
+Packages/
+Package.resolved
+.build/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
+
+# Build artifacts
+*.app
+*.dSYM.zip
+*.dSYM
+

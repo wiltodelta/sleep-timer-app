@@ -1,5 +1,7 @@
 # Sleep Timer for macOS
 
+[![Build Sleep Timer App](https://github.com/wiltodelta/sleep-timer-app/actions/workflows/build.yml/badge.svg)](https://github.com/wiltodelta/sleep-timer-app/actions/workflows/build.yml)
+
 A menu bar application for macOS that allows you to set a sleep timer to automatically put your Mac to sleep after a specified time.
 
 ## Features
@@ -19,37 +21,37 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 
 ## Installation
 
-### Building from Source
+### Option 1: Download Pre-built App (Recommended)
+
+1. Go to [Actions](https://github.com/wiltodelta/sleep-timer-app/actions) tab
+2. Click on the latest successful build
+3. Download `Sleep-Timer-macOS` artifact
+4. Unzip and move `Sleep Timer.app` to Applications folder
+
+> **Note**: You may need to right-click the app and select "Open" the first time due to macOS Gatekeeper.
+
+### Option 2: Building from Source
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/sleep-timer-app.git
+git clone https://github.com/wiltodelta/sleep-timer-app.git
 cd sleep-timer-app
 ```
 
-2. Build the application using Swift Package Manager:
+2. Create app bundle:
 ```bash
-swift build -c release
+./create-app.sh
 ```
 
-3. Run the application:
+3. Open the app:
 ```bash
-.build/release/SleepTimer
+open "Sleep Timer.app"
 ```
 
-### Creating a Standalone App
-
-To create a standalone `.app` bundle that can be moved to Applications folder:
-
-1. Open the project in Xcode:
+Or move to Applications:
 ```bash
-open Package.swift
+mv "Sleep Timer.app" /Applications/
 ```
-
-2. In Xcode:
-   - Select Product > Archive
-   - Export the application
-   - Move to Applications folder
 
 ## Usage
 
@@ -100,6 +102,21 @@ sleep-timer-app/
 - **InactiveTimerView**: Timer setup interface
 - **ActiveTimerView**: Active timer with progress and controls
 
+## Releases
+
+To create a new release with automatic app building:
+
+1. Tag your commit:
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+2. GitHub Actions will automatically:
+   - Build the app
+   - Create a release
+   - Attach the app as a downloadable asset
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -131,4 +148,3 @@ MIT License - feel free to use this project for personal or commercial purposes.
 ## Credits
 
 Created with ❤️ for Mac users who want better control over their sleep schedules.
-

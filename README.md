@@ -17,6 +17,7 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 ## Requirements
 
 - macOS 13.0 (Ventura) or later
+- Apple Silicon (M1/M2/M3) or Intel Mac (runs via Rosetta 2)
 - Xcode 15.0 or later (for building from source)
 
 ## Installation

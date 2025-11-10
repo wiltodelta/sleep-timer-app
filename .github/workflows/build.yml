@@ -19,10 +19,8 @@ jobs:
       with:
         swift-version: "5.9"
     
-    - name: Build Release (Universal Binary)
-      run: |
-        # Build for both architectures to create universal binary
-        swift build -c release --arch arm64 --arch x86_64
+    - name: Build Release
+      run: swift build -c release
     
     - name: Generate Icon
       run: |

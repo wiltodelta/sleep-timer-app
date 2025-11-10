@@ -20,7 +20,7 @@ struct InactiveTimerView: View {
     @Binding var selectedHours: Double
     @StateObject private var launchManager = LaunchAtLoginManager.shared
 
-    private let presetHours: [Double] = [0.5, 1, 1.5, 2, 3, 4, 6, 8]
+    private let presetHours: [Double] = [0.25, 0.5, 1, 1.5, 2, 3, 4, 6]
 
     var body: some View {
         VStack(spacing: 0) {

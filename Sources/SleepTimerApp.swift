@@ -65,7 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStatusItem() {
         if let button = statusItem.button {
             // Change icon based on timer state
-            let iconName = timerManager.isTimerActive ? "moon.zzz.fill" : "moon"
+            let iconName = timerManager.isTimerActive ? "moon.fill" : "moon"
             button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Sleep Timer")
         }
     }

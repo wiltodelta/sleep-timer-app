@@ -37,7 +37,7 @@ jobs:
     - name: Compress for Release
       if: startsWith(github.ref, 'refs/tags/v')
       run: |
-        ditto -c -k --sequesterRsrc --keepParent "Sleep Timer.app" "Sleep-Timer-macOS.zip"
+        zip -r -y "Sleep-Timer-macOS.zip" "Sleep Timer.app"
     
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/v')

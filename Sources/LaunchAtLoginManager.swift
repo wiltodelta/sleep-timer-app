@@ -3,7 +3,7 @@ import ServiceManagement
 
 class LaunchAtLoginManager: ObservableObject {
     static let shared = LaunchAtLoginManager()
-    
+
     @Published var isEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isEnabled, forKey: "LaunchAtLogin")
@@ -14,18 +14,18 @@ class LaunchAtLoginManager: ObservableObject {
             }
         }
     }
-    
+
     private init() {
         self.isEnabled = UserDefaults.standard.bool(forKey: "LaunchAtLogin")
     }
-    
+
     func checkStatus() {
         if #available(macOS 13.0, *) {
             let service = SMAppService.mainApp
             isEnabled = service.status == .enabled
         }
     }
-    
+
     private func enableLaunchAtLogin() {
         if #available(macOS 13.0, *) {
             let service = SMAppService.mainApp
@@ -41,7 +41,7 @@ class LaunchAtLoginManager: ObservableObject {
             }
         }
     }
-    
+
     private func disableLaunchAtLogin() {
         if #available(macOS 13.0, *) {
             let service = SMAppService.mainApp
@@ -56,4 +56,3 @@ class LaunchAtLoginManager: ObservableObject {
         }
     }
 }
-

@@ -3,31 +3,31 @@ import AppKit
 
 class TimerManager: ObservableObject {
     static let shared = TimerManager()
-    
+
     @Published var isTimerActive: Bool = false
     @Published var remainingTime: TimeInterval = 0
     @Published var totalTime: TimeInterval = 0
-    
+
     private var timer: Timer?
     private var targetDate: Date?
-    
+
     private init() {}
-    
+
     func startTimer(hours: Double) {
         stopTimer()
-        
+
         totalTime = hours * 3600
         remainingTime = totalTime
         targetDate = Date().addingTimeInterval(totalTime)
         isTimerActive = true
-        
+
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             self?.updateTimer()
         }
-        
+
         notifyTimerUpdated()
     }
-    
+
     func stopTimer() {
         timer?.invalidate()
         timer = nil
@@ -37,46 +37,45 @@ class TimerManager: ObservableObject {
         targetDate = nil
         notifyTimerUpdated()
     }
-    
+
     private func updateTimer() {
         guard let targetDate = targetDate else {
             stopTimer()
             return
         }
-        
+
         remainingTime = targetDate.timeIntervalSinceNow
-        
+
         if remainingTime <= 0 {
             stopTimer()
             putComputerToSleep()
         }
-        
+
         notifyTimerUpdated()
     }
-    
+
     private func putComputerToSleep() {
         let task = Process()
         task.launchPath = "/usr/bin/pmset"
         task.arguments = ["sleepnow"]
-        
+
         do {
             try task.run()
         } catch {
             print("Failed to put computer to sleep: \(error)")
         }
     }
-    
+
     private func notifyTimerUpdated() {
         NotificationCenter.default.post(name: NSNotification.Name("TimerUpdated"), object: nil)
     }
-    
+
     func addTime(minutes: Int) {
         guard isTimerActive, let currentTarget = targetDate else { return }
-        
+
         let newTarget = currentTarget.addingTimeInterval(TimeInterval(minutes * 60))
         targetDate = newTarget
         totalTime += TimeInterval(minutes * 60)
         updateTimer()
     }
 }
-

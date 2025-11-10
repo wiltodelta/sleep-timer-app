@@ -3,7 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var timerManager = TimerManager.shared
     @State private var selectedHours: Double = 1.0
-    
+
     var body: some View {
         VStack(spacing: 0) {
             if timerManager.isTimerActive {
@@ -19,9 +19,9 @@ struct ContentView: View {
 struct InactiveTimerView: View {
     @Binding var selectedHours: Double
     @StateObject private var launchManager = LaunchAtLoginManager.shared
-    
+
     private let presetHours: [Double] = [0.5, 1, 1.5, 2, 3, 4, 6, 8]
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Time display
@@ -29,10 +29,10 @@ struct InactiveTimerView: View {
                 Text(formatHours(selectedHours))
                     .font(.system(size: 48, weight: .regular, design: .rounded))
                     .foregroundColor(.primary)
-                
+
                 Slider(value: $selectedHours, in: 0.25...12, step: 0.25)
                     .controlSize(.small)
-                
+
                 HStack {
                     Text("15 min")
                         .font(.system(size: 10))
@@ -45,9 +45,9 @@ struct InactiveTimerView: View {
             }
             .padding(20)
             .padding(.top, 12)
-            
+
             Divider()
-            
+
             // Presets
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
@@ -63,9 +63,9 @@ struct InactiveTimerView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            
+
             Divider()
-            
+
             // Action buttons
             VStack(spacing: 8) {
                 Button("Start Timer") {
@@ -74,17 +74,17 @@ struct InactiveTimerView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
-                
+
                 Divider()
                     .padding(.vertical, 4)
-                
+
                 Toggle(isOn: $launchManager.isEnabled) {
                     Text("Launch at Login")
                         .font(.system(size: 12))
                 }
                 .toggleStyle(.checkbox)
                 .controlSize(.small)
-                
+
                 Button("Quit") {
                     NSApplication.shared.terminate(nil)
                 }
@@ -97,7 +97,7 @@ struct InactiveTimerView: View {
             .padding(.vertical, 16)
         }
     }
-    
+
     private func formatHours(_ hours: Double) -> String {
         if hours < 1 {
             let minutes = Int(hours * 60)
@@ -114,7 +114,7 @@ struct InactiveTimerView: View {
             return "\(h)h \(m)m"
         }
     }
-    
+
     private func formatHoursShort(_ hours: Double) -> String {
         if hours < 1 {
             return "\(Int(hours * 60))m"
@@ -131,7 +131,7 @@ struct InactiveTimerView: View {
 struct PresetButton: View {
     let hours: Double
     @Binding var selectedHours: Double
-    
+
     var body: some View {
         Button(action: {
             selectedHours = hours
@@ -145,7 +145,7 @@ struct PresetButton: View {
         .tint(selectedHours == hours ? .accentColor : .gray)
         .controlSize(.small)
     }
-    
+
     private func formatHoursShort(_ hours: Double) -> String {
         if hours < 1 {
             return "\(Int(hours * 60))m"
@@ -161,7 +161,7 @@ struct PresetButton: View {
 
 struct ActiveTimerView: View {
     @StateObject private var timerManager = TimerManager.shared
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Circular progress
@@ -170,13 +170,13 @@ struct ActiveTimerView: View {
                     Circle()
                         .stroke(Color(NSColor.separatorColor), lineWidth: 10)
                         .frame(width: 140, height: 140)
-                    
+
                     Circle()
                         .trim(from: 0, to: CGFloat(timerManager.remainingTime / timerManager.totalTime))
                         .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 10, lineCap: .round))
                         .frame(width: 140, height: 140)
                         .rotationEffect(.degrees(-90))
-                    
+
                     VStack(spacing: 2) {
                         Text(formatTime(timerManager.remainingTime))
                             .font(.system(size: 26, weight: .medium, design: .rounded))
@@ -186,7 +186,7 @@ struct ActiveTimerView: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                
+
                 VStack(spacing: 2) {
                     Text("Sleep at \(formatTargetTime(timerManager.remainingTime))")
                         .font(.system(size: 12))
@@ -195,9 +195,9 @@ struct ActiveTimerView: View {
             }
             .padding(20)
             .padding(.top, 12)
-            
+
             Divider()
-            
+
             // Add time buttons
             VStack(spacing: 8) {
                 HStack(spacing: 8) {
@@ -213,9 +213,9 @@ struct ActiveTimerView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
-            
+
             Divider()
-            
+
             // Cancel button
             Button("Stop Timer") {
                 timerManager.stopTimer()
@@ -228,14 +228,14 @@ struct ActiveTimerView: View {
             .padding(.vertical, 16)
         }
     }
-    
+
     private func formatTime(_ time: TimeInterval) -> String {
         let hours = Int(time) / 3600
         let minutes = Int(time) % 3600 / 60
         let seconds = Int(time) % 60
         return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
-    
+
     private func formatTargetTime(_ remainingTime: TimeInterval) -> String {
         let targetDate = Date().addingTimeInterval(remainingTime)
         let formatter = DateFormatter()

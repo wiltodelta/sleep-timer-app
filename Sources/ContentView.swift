@@ -2,41 +2,22 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var timerManager = TimerManager.shared
-    @StateObject private var permissionsManager = PermissionsManager.shared
     @State private var selectedHours: Double = 1.0
-    @State private var showPermissionsHelp = false
     
     var body: some View {
         VStack(spacing: 0) {
             if timerManager.isTimerActive {
                 ActiveTimerView()
             } else {
-                InactiveTimerView(
-                    selectedHours: $selectedHours,
-                    showPermissionsHelp: $showPermissionsHelp
-                )
+                InactiveTimerView(selectedHours: $selectedHours)
             }
         }
         .frame(width: 280)
-        .alert("Welcome to Sleep Timer", isPresented: $permissionsManager.showFirstRunAlert) {
-            Button("Open Settings") {
-                PermissionsManager.shared.openSystemSettings()
-            }
-            Button("Got It") {
-                permissionsManager.showFirstRunAlert = false
-            }
-        } message: {
-            Text("To automatically sleep your Mac, this app uses the 'pmset' command.\n\nIf sleep doesn't work, you may need to grant permissions in System Settings > Privacy & Security > Automation.\n\nYou can test permissions anytime from the Help menu.")
-        }
-        .sheet(isPresented: $showPermissionsHelp) {
-            PermissionsHelpView(isPresented: $showPermissionsHelp)
-        }
     }
 }
 
 struct InactiveTimerView: View {
     @Binding var selectedHours: Double
-    @Binding var showPermissionsHelp: Bool
     @StateObject private var launchManager = LaunchAtLoginManager.shared
     
     private let presetHours: [Double] = [0.5, 1, 1.5, 2, 3, 4, 6, 8]
@@ -104,23 +85,13 @@ struct InactiveTimerView: View {
                 .toggleStyle(.checkbox)
                 .controlSize(.small)
                 
-                HStack(spacing: 12) {
-                    Button("Help") {
-                        showPermissionsHelp = true
-                    }
-                    .buttonStyle(.plain)
-                    .controlSize(.small)
-                    .foregroundColor(.secondary)
-                    .font(.system(size: 11))
-                    
-                    Button("Quit") {
-                        NSApplication.shared.terminate(nil)
-                    }
-                    .buttonStyle(.plain)
-                    .controlSize(.small)
-                    .foregroundColor(.secondary)
-                    .font(.system(size: 11))
+                Button("Quit") {
+                    NSApplication.shared.terminate(nil)
                 }
+                .buttonStyle(.plain)
+                .controlSize(.small)
+                .foregroundColor(.secondary)
+                .font(.system(size: 11))
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
@@ -272,103 +243,3 @@ struct ActiveTimerView: View {
         return formatter.string(from: targetDate)
     }
 }
-
-struct PermissionsHelpView: View {
-    @Binding var isPresented: Bool
-    @State private var testResult: String = ""
-    @State private var testSuccess: Bool = false
-    @State private var isTesting: Bool = false
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            HStack {
-                Text("Permissions & Help")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                Spacer()
-                Button(action: { isPresented = false }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                        .font(.title2)
-                }
-                .buttonStyle(.plain)
-            }
-            
-            Divider()
-            
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("How It Works")
-                        .font(.headline)
-                    Text("Sleep Timer uses the macOS 'pmset' command to put your Mac to sleep. This is a system utility that may require permissions.")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("If Sleep Doesn't Work:")
-                        .font(.headline)
-                    Text("1. Open System Settings\n2. Go to Privacy & Security > Automation\n3. Enable permissions for Sleep Timer\n4. Test again using the button below")
-                        .font(.system(size: 13))
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                
-                Divider()
-                
-                VStack(spacing: 12) {
-                    HStack {
-                        Button(isTesting ? "Testing..." : "Test Permissions") {
-                            testPermissions()
-                        }
-                        .disabled(isTesting)
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        
-                        Button("Open System Settings") {
-                            PermissionsManager.shared.openSystemSettings()
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                    }
-                    
-                    if !testResult.isEmpty {
-                        HStack(spacing: 8) {
-                            Image(systemName: testSuccess ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .foregroundColor(testSuccess ? .green : .red)
-                            Text(testResult)
-                                .font(.system(size: 12))
-                                .foregroundColor(testSuccess ? .green : .red)
-                        }
-                        .padding(12)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(testSuccess ? Color.green.opacity(0.1) : Color.red.opacity(0.1))
-                        .cornerRadius(8)
-                    }
-                }
-            }
-            
-            Spacer()
-            
-            Button("Close") {
-                isPresented = false
-            }
-            .keyboardShortcut(.cancelAction)
-        }
-        .padding(24)
-        .frame(width: 480, height: 480)
-    }
-    
-    private func testPermissions() {
-        isTesting = true
-        testResult = ""
-        
-        PermissionsManager.shared.testSleepPermissions { success, message in
-            testSuccess = success
-            testResult = message
-            isTesting = false
-        }
-    }
-}
-

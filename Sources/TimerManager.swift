@@ -63,21 +63,6 @@ class TimerManager: ObservableObject {
             try task.run()
         } catch {
             print("Failed to put computer to sleep: \(error)")
-            
-            // Alternative method using AppleScript
-            let script = """
-            tell application "System Events"
-                sleep
-            end tell
-            """
-            
-            if let appleScript = NSAppleScript(source: script) {
-                var error: NSDictionary?
-                appleScript.executeAndReturnError(&error)
-                if let error = error {
-                    print("AppleScript error: \(error)")
-                }
-            }
         }
     }
     

@@ -21,10 +21,10 @@ func createIcon(size: CGFloat, filename: String) {
     let image = NSImage(size: NSSize(width: size, height: size))
     image.lockFocus()
     
-    // Background gradient
+    // Background gradient (lighter)
     let gradient = NSGradient(colors: [
-        NSColor(red: 0.2, green: 0.3, blue: 0.5, alpha: 1.0),
-        NSColor(red: 0.1, green: 0.15, blue: 0.3, alpha: 1.0)
+        NSColor(red: 0.4, green: 0.5, blue: 0.75, alpha: 1.0),
+        NSColor(red: 0.3, green: 0.4, blue: 0.65, alpha: 1.0)
     ])
     let rect = NSRect(x: 0, y: 0, width: size, height: size)
     gradient?.draw(in: rect, angle: -45)
@@ -36,7 +36,7 @@ func createIcon(size: CGFloat, filename: String) {
         width: size * 0.6,
         height: size * 0.6
     )
-    NSColor.white.set()
+    NSColor.white.withAlphaComponent(0.95).set()
     symbol.draw(in: symbolRect)
     
     image.unlockFocus()

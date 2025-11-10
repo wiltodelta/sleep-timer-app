@@ -18,6 +18,7 @@ struct ContentView: View {
 
 struct InactiveTimerView: View {
     @Binding var selectedHours: Double
+    @StateObject private var launchManager = LaunchAtLoginManager.shared
     
     private let presetHours: [Double] = [0.5, 1, 1.5, 2, 3, 4, 6, 8]
     
@@ -73,6 +74,16 @@ struct InactiveTimerView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
+                
+                Divider()
+                    .padding(.vertical, 4)
+                
+                Toggle(isOn: $launchManager.isEnabled) {
+                    Text("Launch at Login")
+                        .font(.system(size: 12))
+                }
+                .toggleStyle(.checkbox)
+                .controlSize(.small)
                 
                 Button("Quit") {
                     NSApplication.shared.terminate(nil)

@@ -20,6 +20,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hide dock icon
         NSApp.setActivationPolicy(.accessory)
         
+        // Check launch at login status
+        LaunchAtLoginManager.shared.checkStatus()
+        
         // Create status bar item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
@@ -31,7 +34,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Create popover
         popover = NSPopover()
-        popover.contentSize = NSSize(width: 280, height: 320)
+        popover.contentSize = NSSize(width: 280, height: 360)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: ContentView())
         

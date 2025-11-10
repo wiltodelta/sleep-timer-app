@@ -22,6 +22,11 @@ jobs:
     - name: Build Release
       run: swift build -c release
     
+    - name: Generate Icon
+      run: |
+        chmod +x create-icon.sh
+        ./create-icon.sh
+    
     - name: Create App Bundle
       run: |
         chmod +x create-app.sh

@@ -28,4 +28,8 @@ Icon
 *.app
 *.dSYM.zip
 *.dSYM
+*.zip
+
+# Xcode
+*.xcodeproj
 

@@ -27,17 +27,16 @@ jobs:
         chmod +x create-app.sh
         ./create-app.sh
     
+    - name: Create ZIP Archive
+      run: |
+        zip -r -y "Sleep-Timer-macOS.zip" "Sleep Timer.app"
+    
     - name: Upload App Bundle
       uses: actions/upload-artifact@v4
       with:
         name: Sleep-Timer-macOS
-        path: Sleep Timer.app
+        path: Sleep-Timer-macOS.zip
         retention-days: 30
-    
-    - name: Compress for Release
-      if: startsWith(github.ref, 'refs/tags/v')
-      run: |
-        zip -r -y "Sleep-Timer-macOS.zip" "Sleep Timer.app"
     
     - name: Create Release (on tag)
       if: startsWith(github.ref, 'refs/tags/v')

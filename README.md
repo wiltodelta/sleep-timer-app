@@ -35,6 +35,8 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 6. Move `Sleep Timer.app` to Applications folder
 
 > **Note**: The app is not notarized by Apple, so you need to remove the quarantine attribute or right-click and select "Open" the first time.
+>
+> **Security**: If you have concerns about running a pre-built app, you can always review the source code and build it yourself (see Option 2 below).
 
 ### Option 2: Building from Source
 
@@ -110,6 +112,15 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 MIT License - feel free to use this project for personal or commercial purposes.
 
 ## Troubleshooting
+
+**"Sleep Timer is damaged and can't be opened" error:**
+- This is macOS Gatekeeper blocking unsigned apps downloaded from the internet
+- Run this command to remove the quarantine attribute:
+  ```bash
+  xattr -cr "Sleep Timer.app"
+  ```
+- Alternatively, right-click the app, select "Open", and confirm in the dialog
+- **Why this happens**: The app is not notarized by Apple, so macOS marks it as potentially unsafe
 
 **Timer doesn't put Mac to sleep:**
 - Check System Settings > Privacy & Security > Automation

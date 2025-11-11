@@ -31,7 +31,7 @@ jobs:
         zip -r -y "Sleep-Timer-macOS.zip" "Sleep Timer.app"
     
     - name: Upload App Bundle
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: Sleep-Timer-macOS
         path: Sleep-Timer-macOS.zip

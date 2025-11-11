@@ -4,14 +4,22 @@
 
 A menu bar application for macOS that allows you to set a sleep timer to automatically put your Mac to sleep after a specified time.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/inactive-timer.png" alt="Sleep Timer - Inactive" width="280">
+  <img src="screenshots/active-timer.png" alt="Sleep Timer - Active" width="280">
+</p>
+
 ## Features
 
 - 🌙 Menu bar integration - always accessible from your Mac's menu bar
 - ⏰ Flexible timer - set from 15 minutes to 12 hours
-- 🎯 Quick presets - 30 min, 1h, 1.5h, 2h, 3h, 4h, 6h, 8h
+- 🎯 Quick presets - 15 min, 30 min, 1h, 1.5h, 2h, 3h, 4h, 6h
 - ➕ Extend timer - add 5, 15, 30, or 60 minutes to active timer
 - 📊 Visual progress - circular progress indicator with remaining time
-- 🔔 Menu bar countdown - see remaining time in menu bar
+- 🌙 Active timer indicator - menu bar icon changes when timer is running
+- 🚀 Launch at Login - option to start automatically at login
 - 🎨 Modern SwiftUI interface
 
 ## Requirements
@@ -69,7 +77,7 @@ mv "Sleep Timer.app" /Applications/
    - Use the slider for custom times
    - Click a preset button for quick selection
 4. Click "Start Timer" to begin
-5. The menu bar will show the countdown
+5. The menu bar icon changes to indicate an active timer (filled moon)
 6. Click the menu bar icon again to:
    - View remaining time and progress
    - Add more time if needed
@@ -84,8 +92,8 @@ The app requires permission to put your Mac to sleep. On first use, macOS may pr
 
 - Built with Swift and SwiftUI
 - Uses `pmset sleepnow` command to sleep the Mac
-- Fallback to AppleScript if pmset fails
 - Runs as menu bar only application (no dock icon)
+- Launch at Login support via `SMAppService`
 - Minimal resource usage
 
 ## Releases

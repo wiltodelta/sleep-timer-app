@@ -13,4 +13,3 @@ fi
 # Run the application
 echo "Starting Sleep Timer..."
 .build/release/SleepTimer
-

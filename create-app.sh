@@ -78,4 +78,3 @@ echo "  mv '$APP_DIR' /Applications/"
 echo ""
 echo "To run now:"
 echo "  open '$APP_DIR'"
-

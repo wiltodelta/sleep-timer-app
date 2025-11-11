@@ -86,4 +86,3 @@ iconutil -c icns "$ICON_DIR" -o "Resources/AppIcon.icns"
 rm -rf "$TEMP_DIR"
 
 echo "✅ Icon created: Resources/AppIcon.icns"
-

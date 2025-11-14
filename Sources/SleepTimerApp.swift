@@ -15,6 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private var popover: NSPopover!
     private var timerManager = TimerManager.shared
+    private var sleepManager = SleepDetectionManager.shared
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide dock icon
@@ -47,6 +48,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.updateStatusItem()
         }
 
+        // Update icon when camera mode changes
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("CameraModeChanged"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateStatusItem()
+        }
+
         updateStatusItem()
     }
 
@@ -64,8 +74,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateStatusItem() {
         if let button = statusItem.button {
-            // Change icon based on timer state
-            let iconName = timerManager.isTimerActive ? "moon.fill" : "moon"
+            let iconName: String
+            
+            if timerManager.isTimerActive {
+                // Timer is active (any mode) - always moon.fill
+                iconName = "moon.fill"
+            } else if sleepManager.isCameraModeEnabled {
+                // Camera mode with no active timer - eye icon
+                iconName = "eye.fill"
+            } else {
+                // Manual mode with no active timer - regular moon
+                iconName = "moon"
+            }
+            
             button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Sleep Timer")
         }
     }

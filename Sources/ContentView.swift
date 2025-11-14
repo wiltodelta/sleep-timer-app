@@ -1,24 +1,102 @@
 import SwiftUI
+import AppKit
 
 struct ContentView: View {
     @StateObject private var timerManager = TimerManager.shared
+    @StateObject private var sleepManager = SleepDetectionManager.shared
+    @State private var selectedMode: TimerMode = .manual
     @State private var selectedHours: Double = 1.0
 
     var body: some View {
         VStack(spacing: 0) {
-            if timerManager.isTimerActive {
-                ActiveTimerView()
-            } else {
-                InactiveTimerView(selectedHours: $selectedHours)
+            Picker("Mode", selection: $selectedMode) {
+                Text("Timer").tag(TimerMode.manual)
+                Text("Camera").tag(TimerMode.camera)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 12)
+
+            Divider()
+
+            Group {
+                switch selectedMode {
+                case .manual:
+                    if timerManager.isTimerActive {
+                        ActiveTimerView()
+                    } else {
+                        InactiveTimerView(selectedHours: $selectedHours)
+                    }
+                case .camera:
+                    CameraModeView()
+                }
+            }
+
+            Divider()
+
+            // Common settings footer
+            CommonSettingsView()
+        }
+        .onAppear {
+            updateWindowSize(for: selectedMode)
+            sleepManager.setCameraModeEnabled(selectedMode == .camera)
+            
+            // Notify status bar to update icon on launch
+            NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
+        }
+            .onChange(of: selectedMode) { newMode in
+                updateWindowSize(for: newMode)
+                sleepManager.setCameraModeEnabled(newMode == .camera)
+                
+                // Notify status bar to update icon
+                NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
+            }
+    }
+
+    private func updateWindowSize(for mode: TimerMode) {
+        let size = NSSize(width: 320, height: 420)
+
+        DispatchQueue.main.async {
+            if let window = NSApp.windows.first {
+                window.setContentSize(size)
             }
         }
-        .frame(width: 280)
+    }
+}
+
+enum TimerMode {
+    case manual
+    case camera
+}
+
+struct CommonSettingsView: View {
+    @StateObject private var launchManager = LaunchAtLoginManager.shared
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Toggle(isOn: $launchManager.isEnabled) {
+                Text("Launch at Login")
+                    .font(.system(size: 12))
+            }
+            .toggleStyle(.checkbox)
+            .controlSize(.small)
+
+            Button("Quit") {
+                NSApplication.shared.terminate(nil)
+            }
+            .buttonStyle(.plain)
+            .controlSize(.small)
+            .foregroundColor(.secondary)
+            .font(.system(size: 11))
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
     }
 }
 
 struct InactiveTimerView: View {
     @Binding var selectedHours: Double
-    @StateObject private var launchManager = LaunchAtLoginManager.shared
 
     private let presetHours: [Double] = [0.25, 0.5, 1, 1.5, 2, 3, 4, 6]
 
@@ -66,33 +144,13 @@ struct InactiveTimerView: View {
 
             Divider()
 
-            // Action buttons
-            VStack(spacing: 8) {
-                Button("Start Timer") {
-                    TimerManager.shared.startTimer(hours: selectedHours)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .keyboardShortcut(.defaultAction)
-
-                Divider()
-                    .padding(.vertical, 4)
-
-                Toggle(isOn: $launchManager.isEnabled) {
-                    Text("Launch at Login")
-                        .font(.system(size: 12))
-                }
-                .toggleStyle(.checkbox)
-                .controlSize(.small)
-
-                Button("Quit") {
-                    NSApplication.shared.terminate(nil)
-                }
-                .buttonStyle(.plain)
-                .controlSize(.small)
-                .foregroundColor(.secondary)
-                .font(.system(size: 11))
+            // Start button
+            Button("Start Timer") {
+                TimerManager.shared.startTimer(hours: selectedHours)
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .keyboardShortcut(.defaultAction)
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
@@ -241,5 +299,160 @@ struct ActiveTimerView: View {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: targetDate)
+    }
+}
+
+struct CameraModeView: View {
+    @StateObject private var sleepManager = SleepDetectionManager.shared
+    @StateObject private var timerManager = TimerManager.shared
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        VStack(spacing: 16) {
+            introSection
+            statusCard
+            timerCard
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 12)
+        .padding(.bottom, 16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var introSection: some View {
+        VStack(spacing: 10) {
+            Text("Camera Sleep Mode")
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+
+            Text("Sleep Timer gently watches for closed eyes and auto-starts a 30-minute timer. Open your eyes for a few seconds to cancel it.")
+                .font(.system(size: 11))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var statusCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Camera tracking")
+                .font(.system(size: 13, weight: .semibold))
+
+            statusRow(
+                icon: sleepManager.isCameraAuthorized ? "checkmark.circle.fill" : "exclamationmark.triangle.fill",
+                color: sleepManager.isCameraAuthorized ? Color(red: 0.152, green: 0.772, blue: 0.357) : .orange,
+                title: "Camera access",
+                detail: sleepManager.isCameraAuthorized
+                    ? "Permission granted."
+                    : "Allow Sleep Timer to use the camera in System Settings."
+            )
+
+            statusRow(
+                icon: sleepManager.isSessionRunning ? "video.fill" : "camera.metering.partial",
+                color: sleepManager.isSessionRunning ? .accentColor : .orange,
+                title: "Video feed",
+                detail: sleepManager.isSessionRunning ? "Camera is active." : "Waiting for camera…"
+            )
+
+            statusRow(
+                icon: sleepManager.isUserAsleep ? "moon.zzz.fill" : "eye",
+                color: sleepManager.isUserAsleep ? Color(red: 0.152, green: 0.772, blue: 0.357) : .secondary,
+                title: "Sleep detection",
+                detail: sleepManager.statusMessage
+            )
+
+            if !sleepManager.isCameraAuthorized {
+                Button("Open Privacy Settings") {
+                    if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera") {
+                        openURL(url)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.small)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color(NSColor.windowBackgroundColor)))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+        )
+    }
+
+    private var timerCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Sleep timer")
+                .font(.system(size: 13, weight: .semibold))
+
+            if timerManager.isTimerActive {
+                Text("Timer is active.")
+                    .font(.system(size: 12))
+                Text("Time remaining: \(formatTime(timerManager.remainingTime))")
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+            } else {
+                Text("Timer is waiting for closed eyes.")
+                    .font(.system(size: 12))
+                    .foregroundColor(.secondary)
+            }
+
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color(NSColor.windowBackgroundColor)))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+        )
+    }
+
+    private func statusRow(icon: String, color: Color, title: String, detail: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: icon)
+                .foregroundColor(color)
+                .frame(width: 18, height: 18)
+                .padding(.top, 1)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.system(size: 12, weight: .medium))
+                Text(detail)
+                    .font(.system(size: 11))
+                    .foregroundColor(.secondary)
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private var statusTitle: String {
+        if !sleepManager.isCameraAuthorized {
+            return "Camera tracking unavailable"
+        }
+        if !sleepManager.isSessionRunning {
+            return "Camera tracking paused"
+        }
+        if sleepManager.isUserAsleep {
+            return "Camera tracking"
+        }
+        return "Camera tracking"
+    }
+
+    private var statusColor: Color {
+        if !sleepManager.isCameraAuthorized {
+            return .red
+        }
+        if !sleepManager.isSessionRunning {
+            return .orange
+        }
+        let standardGreen = Color(red: 0.152, green: 0.772, blue: 0.357)
+        return sleepManager.isUserAsleep ? standardGreen : standardGreen.opacity(0.8)
+    }
+
+    private func formatTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }

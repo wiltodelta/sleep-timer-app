@@ -16,7 +16,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
     private var isSessionConfigured = false
 
     private let videoOutput = AVCaptureVideoDataOutput()
-    private let videoOutputQueue = DispatchQueue(label: "SleepDetectionManager.VideoOutput")
+    private let videoOutputQueue = DispatchQueue(label: "SleepDetectionManager.VideoOutput", qos: .userInitiated)
 
     private let sequenceHandler = VNSequenceRequestHandler()
 
@@ -24,18 +24,18 @@ final class SleepDetectionManager: NSObject, ObservableObject {
     private let windowSize = 50 // Number of frames to consider (~5 seconds at 10 fps)
     private let sleepThresholdPercent = 0.8 // 80% of frames must be closed
     private let wakeThresholdPercent = 0.3 // 30% or less closed frames means awake
-    
+
     // EAR thresholds with hysteresis to prevent flicker
     private let earClosedThreshold = 0.21 // Below this = eyes closing
     private let earOpenThreshold = 0.25   // Above this = eyes opening
-    
+
     // Frame smoothing to reduce flicker
     private let maxMissedFrames = 10 // ~1 second tolerance for face detection loss
     private var missedFramesCount = 0
-    
+
     // Sliding window buffer: true = eyes closed, false = eyes open
     private var eyeStateWindow: [Bool] = []
-    
+
     // Current eye state for hysteresis
     private var currentEyeState: Bool = false // false = open, true = closed
 
@@ -130,6 +130,24 @@ final class SleepDetectionManager: NSObject, ObservableObject {
             return
         }
 
+        // Configure device for better performance
+        do {
+            try device.lockForConfiguration()
+
+            // Set frame rate to 10 fps for efficiency (matches our window size calculation)
+            if let range = device.activeFormat.videoSupportedFrameRateRanges.first {
+                let targetFrameRate = CMTime(value: 1, timescale: 10) // 10 fps
+                if range.minFrameDuration <= targetFrameRate && targetFrameRate <= range.maxFrameDuration {
+                    device.activeVideoMinFrameDuration = targetFrameRate
+                    device.activeVideoMaxFrameDuration = targetFrameRate
+                }
+            }
+
+            device.unlockForConfiguration()
+        } catch {
+            // Continue with default settings if configuration fails
+        }
+
         do {
             let input = try AVCaptureDeviceInput(device: device)
             if session.canAddInput(input) {
@@ -142,6 +160,11 @@ final class SleepDetectionManager: NSObject, ObservableObject {
 
         videoOutput.setSampleBufferDelegate(self, queue: videoOutputQueue)
         videoOutput.alwaysDiscardsLateVideoFrames = true
+
+        // Set video settings for better performance
+        videoOutput.videoSettings = [
+            kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
+        ]
 
         if session.canAddOutput(videoOutput) {
             session.addOutput(videoOutput)
@@ -175,21 +198,21 @@ final class SleepDetectionManager: NSObject, ObservableObject {
     private func handleEyeState(closed: Bool) {
         // Add current frame state to sliding window
         eyeStateWindow.append(closed)
-        
+
         // Keep window size limited
         if eyeStateWindow.count > windowSize {
             eyeStateWindow.removeFirst()
         }
-        
+
         // Need enough frames before making decisions
         guard eyeStateWindow.count >= windowSize else {
             return
         }
-        
+
         // Calculate percentage of closed frames in the window
         let closedFramesCount = eyeStateWindow.filter { $0 }.count
         let closedPercentage = Double(closedFramesCount) / Double(eyeStateWindow.count)
-        
+
             // Check for sleep condition (high percentage of closed frames)
             if !isUserAsleep && closedPercentage >= sleepThresholdPercent {
                 DispatchQueue.main.async {
@@ -202,7 +225,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
                     NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
                 }
             }
-        
+
             // Check for wake condition (low percentage of closed frames)
             if isUserAsleep && closedPercentage <= wakeThresholdPercent {
                 DispatchQueue.main.async {
@@ -226,6 +249,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
             return
         }
 
+        // Create request with optimized settings
         let request = VNDetectFaceLandmarksRequest { [weak self] request, error in
             guard let self else { return }
 
@@ -242,7 +266,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
                 let rightEye = face.landmarks?.rightEye else {
                 // No face or eyes detected; increment missed frames counter
                 self.missedFramesCount += 1
-                
+
                 // Only reset window if we've missed enough consecutive frames
                 if self.missedFramesCount >= self.maxMissedFrames {
                     self.eyeStateWindow.removeAll()
@@ -255,7 +279,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
                 }
                 return
             }
-            
+
             // Face and eyes found; reset missed frames counter
             self.missedFramesCount = 0
 
@@ -275,19 +299,19 @@ final class SleepDetectionManager: NSObject, ObservableObject {
                 // Currently open: only close if EAR drops below closed threshold
                 isClosed = averageRatio < self.earClosedThreshold
             }
-            
+
             self.currentEyeState = isClosed
             self.handleEyeState(closed: isClosed)
-            
+
             // Update status message with eye state and window stats
             DispatchQueue.main.async {
                 let eyeStatus = isClosed ? "Eyes closed" : "Eyes open"
-                
+
                 // Calculate percentage if we have enough frames
-                if self.eyeStateWindow.count > 0 {
+                if !self.eyeStateWindow.isEmpty {
                     let closedCount = self.eyeStateWindow.filter { $0 }.count
                     let percentage = Int((Double(closedCount) / Double(self.eyeStateWindow.count)) * 100)
-                    
+
                     // Estimate time window (assuming ~10 fps)
                     let timeWindow = self.eyeStateWindow.count / 10
                     self.statusMessage = "\(eyeStatus) (\(percentage)% closed, last \(timeWindow) sec)"
@@ -297,8 +321,15 @@ final class SleepDetectionManager: NSObject, ObservableObject {
             }
         }
 
+        // Use revision 3 for best accuracy (available since macOS 14)
+        if #available(macOS 14.0, *) {
+            request.revision = VNDetectFaceLandmarksRequestRevision3
+        }
+        
         do {
-            try sequenceHandler.perform([request], on: pixelBuffer)
+            // Perform with orientation for better accuracy
+            let orientation = CGImagePropertyOrientation.up
+            try sequenceHandler.perform([request], on: pixelBuffer, orientation: orientation)
         } catch {
             DispatchQueue.main.async {
                 self.statusMessage = "Can't analyze video right now."
@@ -308,56 +339,56 @@ final class SleepDetectionManager: NSObject, ObservableObject {
 
     private static func eyeAspectRatio(for region: VNFaceLandmarkRegion2D) -> Double {
         let points = region.normalizedPoints
-        
+
         // Need at least 6 points for proper EAR calculation
         guard points.count >= 6 else {
             return 0.0
         }
-        
+
         // Classic EAR formula uses 6 key points on the eye contour:
         // EAR = (||p2 - p6|| + ||p3 - p5||) / (2 * ||p1 - p4||)
         //
         // For Vision's eye landmarks, we approximate by finding:
         // - Horizontal extremes (leftmost and rightmost)
         // - Vertical points along the top and bottom of the eye
-        
+
         // Helper function to calculate Euclidean distance
         func distance(_ a: CGPoint, _ b: CGPoint) -> CGFloat {
             let dx = a.x - b.x
             let dy = a.y - b.y
             return sqrt(dx * dx + dy * dy)
         }
-        
+
         // Find horizontal extremes (corners of the eye)
         let leftmost = points.min(by: { $0.x < $1.x }) ?? points[0]
         let rightmost = points.max(by: { $0.x < $1.x }) ?? points[0]
-        
+
         // Sort points by Y coordinate to find top and bottom
         let sortedByY = points.sorted(by: { $0.y < $1.y })
-        
+
         // Select points for vertical measurements
         // Bottom points (lower Y values in Vision's coordinate system)
         let bottomThird = sortedByY.prefix(sortedByY.count / 3)
         let p2 = bottomThird.dropFirst(bottomThird.count / 3).first ?? sortedByY[0]
         let p6 = bottomThird.dropFirst(2 * bottomThird.count / 3).first ?? sortedByY[0]
-        
+
         // Top points (higher Y values)
         let topThird = sortedByY.suffix(sortedByY.count / 3)
         let p3 = topThird.dropFirst(topThird.count / 3).first ?? sortedByY[sortedByY.count - 1]
         let p5 = topThird.dropFirst(2 * topThird.count / 3).first ?? sortedByY[sortedByY.count - 1]
-        
+
         // Calculate distances
         let verticalDist1 = distance(p2, p6)
         let verticalDist2 = distance(p3, p5)
         let horizontalDist = distance(leftmost, rightmost)
-        
+
         guard horizontalDist > 0 else {
             return 0.0
         }
-        
+
         // Classic EAR formula
         let ear = (verticalDist1 + verticalDist2) / (2.0 * horizontalDist)
-        
+
         return Double(ear)
     }
 }

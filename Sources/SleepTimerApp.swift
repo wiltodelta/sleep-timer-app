@@ -35,9 +35,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Create popover
         popover = NSPopover()
-        popover.contentSize = NSSize(width: 280, height: 360)
+        popover.contentSize = NSSize(width: 360, height: 420)
         popover.behavior = .transient
         popover.contentViewController = NSHostingController(rootView: ContentView())
+        popover.delegate = self
 
         // Update icon when timer changes
         NotificationCenter.default.addObserver(
@@ -63,13 +64,40 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func togglePopover() {
         if let button = statusItem.button {
             if popover.isShown {
+                stopMonitoringStatusBarPosition()
                 popover.performClose(nil)
             } else {
                 // Always reposition popover relative to current button bounds
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
                 popover.contentViewController?.view.window?.makeKey()
+                
+                // Start monitoring for status item position changes
+                startMonitoringStatusBarPosition()
             }
         }
+    }
+    
+    private var positionMonitorTimer: Timer?
+    
+    private func startMonitoringStatusBarPosition() {
+        stopMonitoringStatusBarPosition()
+        
+        positionMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            guard let self = self,
+                  self.popover.isShown,
+                  let button = self.statusItem.button else {
+                self?.stopMonitoringStatusBarPosition()
+                return
+            }
+            
+            // Reposition popover to follow the button
+            self.popover.positioningRect = button.bounds
+        }
+    }
+    
+    private func stopMonitoringStatusBarPosition() {
+        positionMonitorTimer?.invalidate()
+        positionMonitorTimer = nil
     }
 
     private func updateStatusItem() {
@@ -89,5 +117,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             
             button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Sleep Timer")
         }
+    }
+}
+
+extension AppDelegate: NSPopoverDelegate {
+    func popoverDidClose(_ notification: Notification) {
+        stopMonitoringStatusBarPosition()
     }
 }

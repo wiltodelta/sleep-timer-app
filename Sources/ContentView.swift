@@ -20,42 +20,48 @@ struct ContentView: View {
 
             Divider()
 
-            Group {
-                switch selectedMode {
-                case .manual:
-                    if timerManager.isTimerActive {
-                        ActiveTimerView()
-                    } else {
-                        InactiveTimerView(selectedHours: $selectedHours)
+                Group {
+                    switch selectedMode {
+                    case .manual:
+                        if timerManager.isTimerActive {
+                            ActiveTimerView()
+                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        } else {
+                            InactiveTimerView(selectedHours: $selectedHours)
+                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                        }
+                    case .camera:
+                        CameraModeView()
+                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
-                case .camera:
-                    CameraModeView()
                 }
-            }
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedMode)
+                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: timerManager.isTimerActive)
 
             Divider()
 
             // Common settings footer
             CommonSettingsView()
         }
+        .background(.regularMaterial)
         .onAppear {
             updateWindowSize(for: selectedMode)
             sleepManager.setCameraModeEnabled(selectedMode == .camera)
-            
+
             // Notify status bar to update icon on launch
             NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
         }
             .onChange(of: selectedMode) { newMode in
                 updateWindowSize(for: newMode)
                 sleepManager.setCameraModeEnabled(newMode == .camera)
-                
+
                 // Notify status bar to update icon
                 NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
             }
     }
 
     private func updateWindowSize(for mode: TimerMode) {
-        let size = NSSize(width: 320, height: 420)
+        let size = NSSize(width: 360, height: 420)
 
         DispatchQueue.main.async {
             if let window = NSApp.windows.first {
@@ -126,21 +132,21 @@ struct InactiveTimerView: View {
 
             Divider()
 
-            // Presets
-            VStack(spacing: 8) {
-                HStack(spacing: 8) {
-                    ForEach(Array(presetHours.prefix(4)), id: \.self) { hours in
-                        PresetButton(hours: hours, selectedHours: $selectedHours)
+                // Presets
+                VStack(spacing: 8) {
+                    HStack(spacing: 8) {
+                        ForEach(Array(presetHours.prefix(4)), id: \.self) { hours in
+                            PresetButton(hours: hours, selectedHours: $selectedHours)
+                        }
+                    }
+                    HStack(spacing: 8) {
+                        ForEach(Array(presetHours.suffix(4)), id: \.self) { hours in
+                            PresetButton(hours: hours, selectedHours: $selectedHours)
+                        }
                     }
                 }
-                HStack(spacing: 8) {
-                    ForEach(Array(presetHours.suffix(4)), id: \.self) { hours in
-                        PresetButton(hours: hours, selectedHours: $selectedHours)
-                    }
-                }
-            }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
 
             Divider()
 
@@ -225,15 +231,29 @@ struct ActiveTimerView: View {
             // Circular progress
             VStack(spacing: 16) {
                 ZStack {
+                    // Background circle with material
                     Circle()
-                        .stroke(Color(NSColor.separatorColor), lineWidth: 10)
+                        .fill(.ultraThinMaterial)
+                        .frame(width: 150, height: 150)
+                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
+
+                    Circle()
+                        .stroke(Color(NSColor.separatorColor).opacity(0.3), lineWidth: 12)
                         .frame(width: 140, height: 140)
 
                     Circle()
                         .trim(from: 0, to: CGFloat(timerManager.remainingTime / timerManager.totalTime))
-                        .stroke(Color.accentColor, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                        .stroke(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color.accentColor, Color.accentColor.opacity(0.7)]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            style: StrokeStyle(lineWidth: 12, lineCap: .round)
+                        )
                         .frame(width: 140, height: 140)
                         .rotationEffect(.degrees(-90))
+                        .shadow(color: Color.accentColor.opacity(0.3), radius: 6, x: 0, y: 3)
 
                     VStack(spacing: 2) {
                         Text(formatTime(timerManager.remainingTime))
@@ -308,16 +328,34 @@ struct CameraModeView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        VStack(spacing: 16) {
-            introSection
-            statusCard
-            timerCard
-            Spacer(minLength: 0)
+        ZStack {
+            // Subtle background gradient
+            LinearGradient(
+                gradient: Gradient(colors: [
+                    Color.accentColor.opacity(0.02),
+                    Color.clear
+                ]),
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+
+            VStack(spacing: 16) {
+                introSection
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                statusCard
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                timerCard
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 12)
+            .padding(.bottom, 16)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 16)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: sleepManager.isUserAsleep)
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: timerManager.isTimerActive)
     }
 
     private var introSection: some View {
@@ -332,6 +370,13 @@ struct CameraModeView: View {
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
+        )
     }
 
     private var statusCard: some View {
@@ -372,13 +417,42 @@ struct CameraModeView: View {
                 .controlSize(.small)
             }
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(NSColor.windowBackgroundColor)))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.ultraThinMaterial)
+
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.08),
+                                Color.white.opacity(0.02)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.white.opacity(0.2),
+                            Color.white.opacity(0.05)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.03), radius: 2, x: 0, y: 1)
     }
 
     private var timerCard: some View {
@@ -399,13 +473,42 @@ struct CameraModeView: View {
             }
 
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color(NSColor.windowBackgroundColor)))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(.ultraThinMaterial)
+
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(colors: [
+                                Color.white.opacity(0.08),
+                                Color.white.opacity(0.02)
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
         )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.white.opacity(0.2),
+                            Color.white.opacity(0.05)
+                        ]),
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        )
+        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
+        .shadow(color: .black.opacity(0.03), radius: 2, x: 0, y: 1)
     }
 
     private func statusRow(icon: String, color: Color, title: String, detail: String) -> some View {

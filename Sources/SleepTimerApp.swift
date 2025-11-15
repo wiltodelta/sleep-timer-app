@@ -70,18 +70,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 // Always reposition popover relative to current button bounds
                 popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
                 popover.contentViewController?.view.window?.makeKey()
-                
+
                 // Start monitoring for status item position changes
                 startMonitoringStatusBarPosition()
             }
         }
     }
-    
+
     private var positionMonitorTimer: Timer?
-    
+
     private func startMonitoringStatusBarPosition() {
         stopMonitoringStatusBarPosition()
-        
+
         positionMonitorTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self,
                   self.popover.isShown,
@@ -89,12 +89,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.stopMonitoringStatusBarPosition()
                 return
             }
-            
+
             // Reposition popover to follow the button
             self.popover.positioningRect = button.bounds
         }
     }
-    
+
     private func stopMonitoringStatusBarPosition() {
         positionMonitorTimer?.invalidate()
         positionMonitorTimer = nil
@@ -103,7 +103,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStatusItem() {
         if let button = statusItem.button {
             let iconName: String
-            
+
             if timerManager.isTimerActive {
                 // Timer is active (any mode) - always moon.fill
                 iconName = "moon.fill"
@@ -114,7 +114,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 // Manual mode with no active timer - regular moon
                 iconName = "moon"
             }
-            
+
             button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Sleep Timer")
         }
     }

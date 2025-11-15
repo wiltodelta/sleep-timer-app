@@ -51,13 +51,13 @@ struct ContentView: View {
             // Notify status bar to update icon on launch
             NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
         }
-            .onChange(of: selectedMode) { newMode in
-                updateWindowSize(for: newMode)
-                sleepManager.setCameraModeEnabled(newMode == .camera)
+        .onChange(of: selectedMode) { newMode in
+            updateWindowSize(for: newMode)
+            sleepManager.setCameraModeEnabled(newMode == .camera)
 
-                // Notify status bar to update icon
-                NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
-            }
+            // Notify status bar to update icon
+            NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
+        }
     }
 
     private func updateWindowSize(for mode: TimerMode) {

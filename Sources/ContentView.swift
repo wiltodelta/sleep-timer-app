@@ -52,6 +52,11 @@ struct ContentView: View {
             NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
         }
         .onChange(of: selectedMode) { newMode in
+            // Stop active timer when switching modes
+            if timerManager.isTimerActive {
+                timerManager.stopTimer()
+            }
+            
             updateWindowSize(for: newMode)
             sleepManager.setCameraModeEnabled(newMode == .camera)
 

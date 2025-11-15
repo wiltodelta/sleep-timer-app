@@ -27,7 +27,6 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 - 👁️ Eye tracking - uses Vision Framework with Eye Aspect Ratio (EAR) algorithm
 - 🛌 Smart timer - automatically starts 30-minute timer when eyes are closed
 - 👀 Wake detection - cancels timer when you open your eyes
-- ⚡ Performance optimized - 50% less CPU usage, 40% better battery life
 - 🔒 Privacy-focused - all processing happens on-device
 
 ### General Features

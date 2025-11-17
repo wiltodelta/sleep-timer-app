@@ -13,9 +13,19 @@ let package = Package(
         )
     ],
     targets: [
+        .target(
+            name: "SleepTimerCore",
+            path: "Sources/SleepTimerCore"
+        ),
         .executableTarget(
             name: "SleepTimer",
-            path: "Sources"
+            dependencies: ["SleepTimerCore"],
+            path: "Sources/SleepTimer"
+        ),
+        .testTarget(
+            name: "SleepTimerTests",
+            dependencies: ["SleepTimerCore"],
+            path: "Tests"
         )
     ]
 )

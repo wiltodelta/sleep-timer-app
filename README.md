@@ -148,6 +148,37 @@ git push origin v1.0.0
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## Development
+
+### Running Tests
+
+The project includes comprehensive unit tests for core functionality:
+
+```bash
+# Run all tests
+swift test
+
+# Run tests with verbose output
+swift test --verbose
+```
+
+Test coverage includes:
+- **TimerManager**: Timer lifecycle, add time, notifications
+- **SleepDetectionManager**: Camera mode, state management, initialization
+
+### Building from Source
+
+```bash
+# Quick run for development
+./run.sh
+
+# Build release version
+swift build -c release
+
+# Create app bundle
+./create-app.sh
+```
+
 ## License
 
 MIT License - feel free to use this project for personal or commercial purposes.

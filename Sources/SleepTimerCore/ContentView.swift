@@ -1,13 +1,15 @@
 import SwiftUI
 import AppKit
 
-struct ContentView: View {
+public struct ContentView: View {
     @StateObject private var timerManager = TimerManager.shared
     @StateObject private var sleepManager = SleepDetectionManager.shared
     @State private var selectedMode: TimerMode = .manual
     @State private var selectedHours: Double = 1.0
 
-    var body: some View {
+    public init() {}
+
+    public var body: some View {
         VStack(spacing: 0) {
             Picker("Mode", selection: $selectedMode) {
                 Text("Timer").tag(TimerMode.manual)

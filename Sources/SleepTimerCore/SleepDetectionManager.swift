@@ -2,14 +2,14 @@ import Foundation
 import AVFoundation
 import Vision
 
-final class SleepDetectionManager: NSObject, ObservableObject {
-    static let shared = SleepDetectionManager()
+public final class SleepDetectionManager: NSObject, ObservableObject {
+    public static let shared = SleepDetectionManager()
 
-    @Published var isCameraModeEnabled: Bool = false
-    @Published var isCameraAuthorized: Bool = false
-    @Published var isSessionRunning: Bool = false
-    @Published var isUserAsleep: Bool = false
-    @Published var statusMessage: String = "Camera tracking is off."
+    @Published public var isCameraModeEnabled: Bool = false
+    @Published public var isCameraAuthorized: Bool = false
+    @Published public var isSessionRunning: Bool = false
+    @Published public var isUserAsleep: Bool = false
+    @Published public var statusMessage: String = "Camera tracking is off."
 
     private let session = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "SleepDetectionManager.SessionQueue")
@@ -53,7 +53,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
         super.init()
     }
 
-    func setCameraModeEnabled(_ enabled: Bool) {
+    public func setCameraModeEnabled(_ enabled: Bool) {
         self.isCameraModeEnabled = enabled
 
         if enabled {
@@ -304,6 +304,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
                 // Only reset window if we've missed enough consecutive frames
                 if self.missedFramesCount >= self.maxMissedFrames {
                     self.eyeStateWindow.removeAll()
+                    self.closedFramesCount = 0 // Reset cached count when clearing window
                     self.currentEyeState = false
                     DispatchQueue.main.async {
                         if self.isSessionRunning {
@@ -378,7 +379,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
         }
     }
 
-    private static func eyeAspectRatio(for region: VNFaceLandmarkRegion2D) -> Double {
+    public static func eyeAspectRatio(for region: VNFaceLandmarkRegion2D) -> Double {
         let points = region.normalizedPoints
 
         // Vision can return different numbers of points depending on the model and device
@@ -492,7 +493,7 @@ final class SleepDetectionManager: NSObject, ObservableObject {
 }
 
 extension SleepDetectionManager: AVCaptureVideoDataOutputSampleBufferDelegate {
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    public func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         process(sampleBuffer: sampleBuffer)
     }
 }

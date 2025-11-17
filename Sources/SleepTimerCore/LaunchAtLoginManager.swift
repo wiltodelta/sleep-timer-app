@@ -1,10 +1,10 @@
 import Foundation
 import ServiceManagement
 
-class LaunchAtLoginManager: ObservableObject {
-    static let shared = LaunchAtLoginManager()
+public class LaunchAtLoginManager: ObservableObject {
+    public static let shared = LaunchAtLoginManager()
 
-    @Published var isEnabled: Bool {
+    @Published public var isEnabled: Bool {
         didSet {
             UserDefaults.standard.set(isEnabled, forKey: "LaunchAtLogin")
             if isEnabled {
@@ -19,7 +19,7 @@ class LaunchAtLoginManager: ObservableObject {
         self.isEnabled = UserDefaults.standard.bool(forKey: "LaunchAtLogin")
     }
 
-    func checkStatus() {
+    public func checkStatus() {
         if #available(macOS 13.0, *) {
             let service = SMAppService.mainApp
             isEnabled = service.status == .enabled

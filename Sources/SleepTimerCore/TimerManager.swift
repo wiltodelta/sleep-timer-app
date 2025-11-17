@@ -1,19 +1,19 @@
 import Foundation
 import AppKit
 
-class TimerManager: ObservableObject {
-    static let shared = TimerManager()
+public class TimerManager: ObservableObject {
+    public static let shared = TimerManager()
 
-    @Published var isTimerActive: Bool = false
-    @Published var remainingTime: TimeInterval = 0
-    @Published var totalTime: TimeInterval = 0
+    @Published public var isTimerActive: Bool = false
+    @Published public var remainingTime: TimeInterval = 0
+    @Published public var totalTime: TimeInterval = 0
 
     private var timer: Timer?
     private var targetDate: Date?
 
     private init() {}
 
-    func startTimer(hours: Double) {
+    public func startTimer(hours: Double) {
         stopTimer()
 
         totalTime = hours * 3600
@@ -28,7 +28,7 @@ class TimerManager: ObservableObject {
         notifyTimerUpdated()
     }
 
-    func stopTimer() {
+    public func stopTimer() {
         timer?.invalidate()
         timer = nil
         isTimerActive = false
@@ -70,7 +70,7 @@ class TimerManager: ObservableObject {
         NotificationCenter.default.post(name: NSNotification.Name("TimerUpdated"), object: nil)
     }
 
-    func addTime(minutes: Int) {
+    public func addTime(minutes: Int) {
         guard isTimerActive, let currentTarget = targetDate else { return }
 
         let newTarget = currentTarget.addingTimeInterval(TimeInterval(minutes * 60))

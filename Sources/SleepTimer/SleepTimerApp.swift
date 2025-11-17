@@ -1,4 +1,5 @@
 import SwiftUI
+import SleepTimerCore
 
 @main
 struct SleepTimerApp: App {

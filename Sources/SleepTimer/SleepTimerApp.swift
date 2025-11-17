@@ -18,7 +18,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var timerManager = TimerManager.shared
     private var sleepManager = SleepDetectionManager.shared
 
+    private func isAnotherInstanceRunning() -> Bool {
+        guard let bundleID = Bundle.main.bundleIdentifier else {
+            return false
+        }
+        
+        let runningApps = NSWorkspace.shared.runningApplications
+        let instances = runningApps.filter { $0.bundleIdentifier == bundleID }
+        
+        // More than one instance means another is already running
+        return instances.count > 1
+    }
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Prevent multiple instances
+        if isAnotherInstanceRunning() {
+            NSLog("Sleep Timer is already running - terminating duplicate instance")
+            NSApp.terminate(nil)
+            return
+        }
+        
         // Hide dock icon
         NSApp.setActivationPolicy(.accessory)
 

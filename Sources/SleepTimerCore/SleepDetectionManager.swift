@@ -35,7 +35,8 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
     private let earOpenThreshold = 0.27   // Above this = eyes opening
 
     // Frame smoothing to reduce flicker
-    private let maxMissedFrames = 30 // ~3 seconds tolerance for face detection loss
+    // Tolerance is 25% of window size for consistent behavior
+    private let maxMissedFrames: Int // Calculated in init
     private var missedFramesCount = 0
 
     // Sliding window buffer: true = eyes closed, false = eyes open
@@ -50,6 +51,8 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
     private let uiUpdateInterval: TimeInterval = 0.3 // Update UI max 3 times per second
 
     private override init() {
+        // Set tolerance to 25% of window size (~15 seconds at 10 fps for 60-second window)
+        self.maxMissedFrames = Int(Double(windowSize) * 0.25)
         super.init()
     }
 

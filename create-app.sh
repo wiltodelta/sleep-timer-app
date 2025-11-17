@@ -5,13 +5,20 @@ BUNDLE_ID="com.sleeptimer.app"
 BUILD_DIR=".build/release"
 APP_DIR="$APP_NAME.app"
 
-# Extract version from latest git tag (remove 'v' prefix)
-VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
-if [ -z "$VERSION" ]; then
-    echo "⚠️  No git tag found, using default version 1.0.0"
-    VERSION="1.0.0"
+# Determine version
+if [ -n "$CI" ]; then
+    # In CI (GitHub Actions): use git tag
+    VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
+    if [ -z "$VERSION" ]; then
+        echo "⚠️  No git tag found in CI, using default version 1.0.0"
+        VERSION="1.0.0"
+    else
+        echo "📦 Building version: $VERSION (from git tag)"
+    fi
 else
-    echo "📦 Building version: $VERSION (from git tag)"
+    # Local build: use fixed development version
+    VERSION="dev"
+    echo "🔨 Building local development version: $VERSION"
 fi
 
 echo "Building Sleep Timer for release..."

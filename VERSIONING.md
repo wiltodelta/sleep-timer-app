@@ -48,7 +48,8 @@ The app version is **automatically derived from git tags**. No need to edit any 
 
 ## How Auto-Update Works
 
-- `create-app.sh` extracts version from latest git tag
+- **In CI/GitHub Actions**: `create-app.sh` extracts version from git tag
+- **Local builds**: Uses fixed `dev` version (not for distribution)
 - Injects version into `Info.plist` during build
 - `UpdateChecker.swift` reads version from `Bundle.main.infoDictionary["CFBundleShortVersionString"]`
 - Checks GitHub Releases API for latest version

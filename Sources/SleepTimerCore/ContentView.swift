@@ -85,6 +85,7 @@ enum TimerMode {
 
 struct CommonSettingsView: View {
     @StateObject private var launchManager = LaunchAtLoginManager.shared
+    @StateObject private var updateChecker = UpdateChecker.shared
 
     var body: some View {
         VStack(spacing: 8) {
@@ -94,6 +95,26 @@ struct CommonSettingsView: View {
             }
             .toggleStyle(.checkbox)
             .controlSize(.small)
+
+            Button(action: {
+                updateChecker.checkForUpdates(showNoUpdateAlert: true)
+            }) {
+                if updateChecker.isCheckingForUpdates {
+                    HStack(spacing: 4) {
+                        ProgressView()
+                            .scaleEffect(0.5)
+                            .frame(width: 10, height: 10)
+                        Text("Checking...")
+                    }
+                } else {
+                    Text("Check for Updates...")
+                }
+            }
+            .buttonStyle(.plain)
+            .controlSize(.small)
+            .foregroundColor(.secondary)
+            .font(.system(size: 11))
+            .disabled(updateChecker.isCheckingForUpdates)
 
             Button("Quit") {
                 NSApplication.shared.terminate(nil)

@@ -17,6 +17,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v5
+      with:
+        fetch-depth: 0  # Fetch all history and tags for version detection
+        fetch-tags: true
+    
+    - name: Display Version Info
+      run: |
+        echo "Git tag: $(git describe --tags --abbrev=0 2>/dev/null || echo 'No tag found')"
+        echo "Building version: $(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo '1.0.0')"
     
     - name: Build Release
       run: swift build -c release
@@ -28,7 +36,11 @@ jobs:
     
     - name: Create ZIP Archive
       run: |
-        zip -r -y "Sleep-Timer-macOS.zip" "Sleep Timer.app"
+        VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo '1.0.0')
+        ZIP_NAME="Sleep-Timer-v${VERSION}-macOS.zip"
+        zip -r -y "$ZIP_NAME" "Sleep Timer.app"
+        # Also create a generic name for easy download
+        cp "$ZIP_NAME" "Sleep-Timer-macOS.zip"
     
     - name: Upload App Bundle
       uses: actions/upload-artifact@v5
@@ -41,7 +53,9 @@ jobs:
       if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v2
       with:
-        files: Sleep-Timer-macOS.zip
+        files: |
+          Sleep-Timer-v*-macOS.zip
+          Sleep-Timer-macOS.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

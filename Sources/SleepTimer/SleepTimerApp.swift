@@ -17,6 +17,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var popover: NSPopover!
     private var timerManager = TimerManager.shared
     private var sleepManager = SleepDetectionManager.shared
+    private var updateChecker = UpdateChecker.shared
 
     private func isAnotherInstanceRunning() -> Bool {
         guard let bundleID = Bundle.main.bundleIdentifier else {
@@ -79,6 +80,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         updateStatusItem()
+        
+        // Check for updates on launch (after 3 seconds delay)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+            self?.updateChecker.checkForUpdates(showNoUpdateAlert: false)
+        }
     }
 
     @objc func togglePopover() {

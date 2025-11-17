@@ -52,6 +52,8 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: Sleep-Timer-v*-macOS.zip
+        draft: false
+        prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

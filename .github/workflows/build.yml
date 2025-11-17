@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-15
     permissions:
       contents: write
     
@@ -20,6 +20,18 @@ jobs:
       with:
         fetch-depth: 0  # Fetch all history and tags for version detection
         fetch-tags: true
+    
+    - name: Select Latest Xcode
+      run: |
+        # Find the latest Xcode version
+        LATEST_XCODE=$(ls /Applications | grep "Xcode" | sort -V | tail -1)
+        echo "Using: $LATEST_XCODE"
+        sudo xcode-select -s /Applications/$LATEST_XCODE/Contents/Developer
+    
+    - name: Display Build Environment
+      run: |
+        xcodebuild -version
+        swift --version
     
     - name: Display Version Info
       run: |

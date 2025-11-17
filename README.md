@@ -187,11 +187,15 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 **"Sleep Timer is damaged and can't be opened" error:**
 - This is macOS Gatekeeper blocking unsigned apps downloaded from the internet
-- Run this command to remove the quarantine attribute:
+- To fix this, first navigate to Applications folder in Terminal:
+  ```bash
+  cd /Applications
+  ```
+- Then run this command to remove the quarantine attribute:
   ```bash
   xattr -cr "Sleep Timer.app"
   ```
-- Alternatively, right-click the app, select "Open", and confirm in the dialog
+- Alternatively, right-click the app in Finder, select "Open", and confirm in the dialog
 - **Why this happens**: The app is not notarized by Apple, so macOS marks it as potentially unsafe
 
 **Timer doesn't put Mac to sleep:**

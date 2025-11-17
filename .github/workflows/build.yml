@@ -26,8 +26,8 @@ jobs:
         echo "Git tag: $(git describe --tags --abbrev=0 2>/dev/null || echo 'No tag found')"
         echo "Building version: $(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo '1.0.0')"
     
-    - name: Build Release
-      run: swift build -c release
+    - name: Clean Build Cache
+      run: rm -rf .build
     
     - name: Create App Bundle
       run: |

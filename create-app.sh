@@ -6,7 +6,7 @@ BUILD_DIR=".build/release"
 APP_DIR="$APP_NAME.app"
 
 # Determine version
-if [ -n "$CI" ]; then
+if [ -n "$GITHUB_ACTIONS" ] || [ -n "$CI" ]; then
     # In CI (GitHub Actions): use git tag
     VERSION=$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//')
     if [ -z "$VERSION" ]; then

@@ -27,7 +27,10 @@ jobs:
         echo "Building version: $(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || echo '1.0.0')"
     
     - name: Clean Build Cache
-      run: rm -rf .build
+      run: |
+        rm -rf .build
+        rm -rf ~/Library/Caches/org.swift.swiftpm
+        rm -rf ~/Library/Developer/Xcode/DerivedData
     
     - name: Create App Bundle
       run: |

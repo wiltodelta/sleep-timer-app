@@ -131,18 +131,35 @@ The app requires the following permissions:
 
 ## Releases
 
-To create a new release with automatic app building:
+### How to Create a New Release
 
-1. Tag your commit:
+The app version is automatically derived from git tags. To release a new version:
+
+1. **Commit and push your changes:**
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git add .
+git commit -m "Add new features"
+git push origin main
 ```
 
-2. GitHub Actions will automatically:
-   - Build the app
-   - Create a release
-   - Attach the app as a downloadable asset
+2. **Create and push a git tag:**
+```bash
+git tag -a v1.2.0 -m "Release v1.2.0"
+git push origin v1.2.0
+```
+
+3. **GitHub Actions will automatically:**
+   - Extract version from the tag (e.g., `v1.2.0` → `1.2.0`)
+   - Build the app with the correct version
+   - Create a GitHub Release
+   - Attach the app as a downloadable ZIP file
+
+**Version format:** Use semantic versioning `MAJOR.MINOR.PATCH`
+- MAJOR: Breaking changes (e.g., `1.x.x` → `2.0.0`)
+- MINOR: New features (e.g., `1.1.x` → `1.2.0`)
+- PATCH: Bug fixes (e.g., `1.1.2` → `1.1.3`)
+
+**Note:** Local builds use version `dev` and are not intended for distribution
 
 ## Contributing
 

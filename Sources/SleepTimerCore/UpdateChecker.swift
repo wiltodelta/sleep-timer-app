@@ -14,8 +14,8 @@ public class UpdateChecker: ObservableObject {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             self.currentVersion = version
         } else {
-            // Fallback version if Bundle is not available
-            self.currentVersion = "1.1.2"
+            // Fallback version if Bundle is not available (e.g., running from CLI)
+            self.currentVersion = "dev"
         }
     }
     

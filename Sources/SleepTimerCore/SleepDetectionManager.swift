@@ -48,7 +48,7 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
     
     // UI update throttling
     private var lastUIUpdateTime: Date?
-    private let uiUpdateInterval: TimeInterval = 0.3 // Update UI max 3 times per second
+    private let uiUpdateInterval: TimeInterval = 1.0 // Update UI max 1 time per second
 
     private override init() {
         // Set tolerance to 25% of window size (~15 seconds at 10 fps for 60-second window)
@@ -205,6 +205,7 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
         missedFramesCount = 0
         currentEyeState = false
         consecutiveClosedFrames = 0
+        lastUIUpdateTime = nil
         DispatchQueue.main.async {
             self.isUserAsleep = false
         }
@@ -345,23 +346,35 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
             let isStrictlyClosed = averageRatio < self.earClosedThreshold
             self.handleEyeState(closed: isStrictlyClosed)
 
-            // Update status message with eye state and window stats
-            DispatchQueue.main.async {
-                // Calculate percentage if we have enough frames
-                let closedPercentage: Double
-                if !self.eyeStateWindow.isEmpty {
-                    // Use cached count instead of filter
-                    closedPercentage = Double(self.closedFramesCount) / Double(self.eyeStateWindow.count)
-                    
-                    // Always show percentage of closed eyes
-                    let closedPercent = Int(closedPercentage * 100)
+            // Update status message with throttling to reduce UI updates
+            let now = Date()
+            let shouldUpdateUI = self.lastUIUpdateTime.map { now.timeIntervalSince($0) >= self.uiUpdateInterval } ?? true
+            
+            if shouldUpdateUI {
+                self.lastUIUpdateTime = now
+                
+                DispatchQueue.main.async {
+                    // Calculate percentage if we have enough frames
+                    if !self.eyeStateWindow.isEmpty {
+                        // Use cached count instead of filter
+                        let closedPercentage = Double(self.closedFramesCount) / Double(self.eyeStateWindow.count)
+                        
+                        // Always show percentage of closed eyes
+                        let closedPercent = Int(closedPercentage * 100)
 
-                    // Estimate time window (assuming ~10 fps)
-                    let timeWindow = self.eyeStateWindow.count / 10
-                    self.statusMessage = "Eyes closed \(closedPercent)% for last \(timeWindow) sec"
-                } else {
-                    closedPercentage = 0
-                    self.statusMessage = "Tracking eyes"
+                        // Estimate time window (assuming ~10 fps)
+                        let timeWindow = self.eyeStateWindow.count / 10
+                        
+                        // Only update if message actually changed to avoid unnecessary string allocations
+                        let newMessage = "Eyes closed \(closedPercent)% for last \(timeWindow) sec"
+                        if self.statusMessage != newMessage {
+                            self.statusMessage = newMessage
+                        }
+                    } else {
+                        if self.statusMessage != "Tracking eyes" {
+                            self.statusMessage = "Tracking eyes"
+                        }
+                    }
                 }
             }
         }

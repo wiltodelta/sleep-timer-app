@@ -27,6 +27,7 @@ public struct ContentView: View {
                     case .manual:
                         if timerManager.isTimerActive {
                             ActiveTimerView()
+                                .equatable()
                                 .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         } else {
                             InactiveTimerView(selectedHours: $selectedHours)
@@ -34,6 +35,7 @@ public struct ContentView: View {
                         }
                     case .camera:
                         CameraModeView()
+                            .equatable()
                             .transition(.opacity.combined(with: .scale(scale: 0.95)))
                     }
                 }
@@ -251,8 +253,13 @@ struct PresetButton: View {
     }
 }
 
-struct ActiveTimerView: View {
+struct ActiveTimerView: View, Equatable {
     @StateObject private var timerManager = TimerManager.shared
+    
+    static func == (lhs: ActiveTimerView, rhs: ActiveTimerView) -> Bool {
+        // Only redraw if timer state actually changes (not every second)
+        return lhs.timerManager.isTimerActive == rhs.timerManager.isTimerActive
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -350,10 +357,19 @@ struct ActiveTimerView: View {
     }
 }
 
-struct CameraModeView: View {
+struct CameraModeView: View, Equatable {
     @StateObject private var sleepManager = SleepDetectionManager.shared
     @StateObject private var timerManager = TimerManager.shared
     @Environment(\.openURL) private var openURL
+    
+    static func == (lhs: CameraModeView, rhs: CameraModeView) -> Bool {
+        // Only redraw if actual state changes, not on every status message update
+        return lhs.sleepManager.isCameraModeEnabled == rhs.sleepManager.isCameraModeEnabled &&
+               lhs.sleepManager.isCameraAuthorized == rhs.sleepManager.isCameraAuthorized &&
+               lhs.sleepManager.isSessionRunning == rhs.sleepManager.isSessionRunning &&
+               lhs.sleepManager.isUserAsleep == rhs.sleepManager.isUserAsleep &&
+               lhs.timerManager.isTimerActive == rhs.timerManager.isTimerActive
+    }
 
     var body: some View {
         ZStack {

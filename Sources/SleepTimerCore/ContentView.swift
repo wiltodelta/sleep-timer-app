@@ -88,6 +88,13 @@ enum TimerMode {
 struct CommonSettingsView: View {
     @StateObject private var launchManager = LaunchAtLoginManager.shared
     @StateObject private var updateChecker = UpdateChecker.shared
+    
+    private var appVersion: String {
+        if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+            return version
+        }
+        return "dev"
+    }
 
     var body: some View {
         VStack(spacing: 8) {
@@ -109,7 +116,7 @@ struct CommonSettingsView: View {
                         Text("Checking...")
                     }
                 } else {
-                    Text("Check for Updates...")
+                    Text("Check for Updates... (v\(appVersion))")
                 }
             }
             .buttonStyle(.plain)

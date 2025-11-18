@@ -14,32 +14,24 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 
 ## Features
 
-### Manual Timer Mode
-- 🌙 Menu bar integration - always accessible from your Mac's menu bar
-- ⏰ Flexible timer - set from 15 minutes to 12 hours
-- 🎯 Quick presets - 15 min, 30 min, 1h, 1.5h, 2h, 3h, 4h, 6h
-- ➕ Extend timer - add 5, 15, 30, or 60 minutes to active timer
-- 📊 Visual progress - circular progress indicator with remaining time
-- 🌙 Active timer indicator - menu bar icon changes when timer is running
+### ⏱️ Advanced Timer Controls
+- **Menu Bar Countdown**: View the remaining time directly in your menu bar next to the icon.
+- **Flexible Duration**: Set timers anywhere from 15 minutes to 12 hours.
+- **Quick Presets**: One-click access to common durations (15m, 30m, 1h, 1.5h, 2h, 3h, 4h, 6h).
+- **Easy Extension**: Add +5, +15, +30, or +60 minutes to an active timer instantly.
+- **Visual Feedback**: Circular progress ring and dynamic menu bar icons (moon/filled moon).
 
-### Version 1.2.0 (Latest)
-- ⏱️ Menu bar timer countdown - see remaining time directly in the menu bar
-- 🎨 New adaptive app icon - supports Light and Dark modes automatically
-- ⚡️ Improved sleep mechanism - switched from `pmset` command to native IOKit API for better reliability and App Store compliance
-- 🐛 Bug fixes and performance improvements
+### 📷 Intelligent Sleep Detection
+- **Auto-Sleep**: Automatically starts a 30-minute timer when it detects your eyes are closed for ~15 seconds.
+- **Privacy First**: All processing is done on-device using Apple's Vision Framework. No video data is stored or transmitted.
+- **Smart Wake**: Automatically cancels the pending timer if you open your eyes.
+- **Energy Efficient**: Optimized "Eye Aspect Ratio" (EAR) algorithm for minimal battery impact.
 
-### Camera-Based Sleep Detection (v1.1.0)
-- 📷 Automatic sleep detection - monitors your eyes using the camera
-- 👁️ Eye tracking - uses Vision Framework with Eye Aspect Ratio (EAR) algorithm
-- 🛌 Smart timer - automatically starts 30-minute timer when eyes are closed
-- 👀 Wake detection - cancels timer when you open your eyes
-- 🔒 Privacy-focused - all processing happens on-device
-
-### General Features
-- 🚀 Launch at Login - option to start automatically at login
-- 🎨 Liquid Glass design - modern macOS UI with translucent materials
-- 💫 Dynamic menu bar icon - moon/filled moon/eye states
-- 🔋 Energy efficient - optimized for minimal battery impact
+### 🎨 System Integration & Design
+- **Adaptive App Icon**: The application icon automatically changes between Light and Dark versions to match your macOS theme.
+- **Native Architecture**: Uses the official `IOKit` API for reliable and safe system sleep (App Sandbox compliant).
+- **Modern UI**: "Liquid Glass" design language that fits perfectly into macOS.
+- **Launch at Login**: Option to start the app automatically in the background.
 
 ## Requirements
 

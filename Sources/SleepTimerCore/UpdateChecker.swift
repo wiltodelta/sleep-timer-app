@@ -3,12 +3,12 @@ import AppKit
 
 public class UpdateChecker: ObservableObject {
     public static let shared = UpdateChecker()
-    
+
     private let githubRepo = "wiltodelta/sleep-timer-app"
     private let currentVersion: String
-    
+
     @Published public var isCheckingForUpdates = false
-    
+
     private init() {
         // Read version from Bundle (Info.plist)
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
@@ -18,30 +18,30 @@ public class UpdateChecker: ObservableObject {
             self.currentVersion = "dev"
         }
     }
-    
+
     public func checkForUpdates(showNoUpdateAlert: Bool = false) {
         guard !isCheckingForUpdates else { return }
-        
+
         isCheckingForUpdates = true
-        
+
         let urlString = "https://api.github.com/repos/\(githubRepo)/releases/latest"
         guard let url = URL(string: urlString) else {
             isCheckingForUpdates = false
             return
         }
-        
+
         var request = URLRequest(url: url)
         request.setValue("application/vnd.github.v3+json", forHTTPHeaderField: "Accept")
-        
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+
+        URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
             guard let self = self else { return }
-            
+
             defer {
                 DispatchQueue.main.async {
                     self.isCheckingForUpdates = false
                 }
             }
-            
+
             if let error = error {
                 print("Update check failed: \(error)")
                 if showNoUpdateAlert {
@@ -49,14 +49,14 @@ public class UpdateChecker: ObservableObject {
                 }
                 return
             }
-            
+
             guard let data = data else {
                 if showNoUpdateAlert {
                     self.showErrorAlert()
                 }
                 return
             }
-            
+
             do {
                 let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
                 self.handleRelease(release, showNoUpdateAlert: showNoUpdateAlert)
@@ -68,10 +68,10 @@ public class UpdateChecker: ObservableObject {
             }
         }.resume()
     }
-    
+
     private func handleRelease(_ release: GitHubRelease, showNoUpdateAlert: Bool) {
         let latestVersion = release.tagName.replacingOccurrences(of: "v", with: "")
-        
+
         if isNewerVersion(latestVersion, than: currentVersion) {
             DispatchQueue.main.async {
                 self.showUpdateAlert(version: latestVersion, url: release.htmlURL, releaseNotes: release.body)
@@ -82,25 +82,25 @@ public class UpdateChecker: ObservableObject {
             }
         }
     }
-    
+
     private func isNewerVersion(_ version1: String, than version2: String) -> Bool {
         let v1Components = version1.split(separator: ".").compactMap { Int($0) }
         let v2Components = version2.split(separator: ".").compactMap { Int($0) }
-        
+
         for i in 0..<max(v1Components.count, v2Components.count) {
             let v1Value = i < v1Components.count ? v1Components[i] : 0
             let v2Value = i < v2Components.count ? v2Components[i] : 0
-            
+
             if v1Value > v2Value {
                 return true
             } else if v1Value < v2Value {
                 return false
             }
         }
-        
+
         return false
     }
-    
+
     private func showUpdateAlert(version: String, url: String, releaseNotes: String?) {
         let alert = NSAlert()
         alert.messageText = "Update Available"
@@ -109,14 +109,14 @@ public class UpdateChecker: ObservableObject {
         alert.addButton(withTitle: "Download")
         alert.addButton(withTitle: "Skip This Version")
         alert.addButton(withTitle: "Remind Me Later")
-        
+
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
-        
+
         let response = alert.runModal()
-        
+
         NSApp.setActivationPolicy(.accessory)
-        
+
         switch response {
         case .alertFirstButtonReturn: // Download
             if let downloadURL = URL(string: url) {
@@ -128,22 +128,22 @@ public class UpdateChecker: ObservableObject {
             break
         }
     }
-    
+
     private func showNoUpdateAvailableAlert() {
         let alert = NSAlert()
         alert.messageText = "You're up to date!"
         alert.informativeText = "Sleep Timer \(currentVersion) is currently the newest version available."
         alert.alertStyle = .informational
         alert.addButton(withTitle: "OK")
-        
+
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
-        
+
         alert.runModal()
-        
+
         NSApp.setActivationPolicy(.accessory)
     }
-    
+
     private func showErrorAlert() {
         DispatchQueue.main.async {
             let alert = NSAlert()
@@ -151,12 +151,12 @@ public class UpdateChecker: ObservableObject {
             alert.informativeText = "Could not check for updates. Please try again later or check manually on GitHub."
             alert.alertStyle = .warning
             alert.addButton(withTitle: "OK")
-            
+
             NSApp.setActivationPolicy(.regular)
             NSApp.activate(ignoringOtherApps: true)
-            
+
             alert.runModal()
-            
+
             NSApp.setActivationPolicy(.accessory)
         }
     }
@@ -168,11 +168,10 @@ private struct GitHubRelease: Codable {
     let tagName: String
     let htmlURL: String
     let body: String?
-    
+
     enum CodingKeys: String, CodingKey {
         case tagName = "tag_name"
         case htmlURL = "html_url"
         case body
     }
 }
-

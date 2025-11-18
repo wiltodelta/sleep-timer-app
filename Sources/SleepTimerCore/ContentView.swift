@@ -60,7 +60,7 @@ public struct ContentView: View {
             if timerManager.isTimerActive {
                 timerManager.stopTimer()
             }
-            
+
             updateWindowSize(for: newMode)
             sleepManager.setCameraModeEnabled(newMode == .camera)
 
@@ -88,7 +88,7 @@ enum TimerMode {
 struct CommonSettingsView: View {
     @StateObject private var launchManager = LaunchAtLoginManager.shared
     @StateObject private var updateChecker = UpdateChecker.shared
-    
+
     private var appVersion: String {
         if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
             return version
@@ -262,7 +262,7 @@ struct PresetButton: View {
 
 struct ActiveTimerView: View, Equatable {
     @StateObject private var timerManager = TimerManager.shared
-    
+
     static func == (lhs: ActiveTimerView, rhs: ActiveTimerView) -> Bool {
         // Only redraw if timer state actually changes (not every second)
         return lhs.timerManager.isTimerActive == rhs.timerManager.isTimerActive
@@ -368,7 +368,7 @@ struct CameraModeView: View, Equatable {
     @StateObject private var sleepManager = SleepDetectionManager.shared
     @StateObject private var timerManager = TimerManager.shared
     @Environment(\.openURL) private var openURL
-    
+
     static func == (lhs: CameraModeView, rhs: CameraModeView) -> Bool {
         // Only redraw if actual state changes, not on every status message update
         return lhs.sleepManager.isCameraModeEnabled == rhs.sleepManager.isCameraModeEnabled &&

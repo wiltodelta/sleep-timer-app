@@ -45,7 +45,7 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
 
     // Current eye state for hysteresis
     private var currentEyeState: Bool = false // false = open, true = closed
-    
+
     // UI update throttling
     private var lastUIUpdateTime: Date?
     private let uiUpdateInterval: TimeInterval = 1.0 // Update UI max 1 time per second
@@ -227,10 +227,10 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
         } else {
             removedValue = nil
         }
-        
+
         // Add current frame state to sliding window
         eyeStateWindow.append(closed)
-        
+
         // Update cached closed frames count efficiently
         if let removed = removedValue, removed {
             closedFramesCount -= 1 // Removed a closed frame
@@ -349,22 +349,22 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
             // Update status message with throttling to reduce UI updates
             let now = Date()
             let shouldUpdateUI = self.lastUIUpdateTime.map { now.timeIntervalSince($0) >= self.uiUpdateInterval } ?? true
-            
+
             if shouldUpdateUI {
                 self.lastUIUpdateTime = now
-                
+
                 DispatchQueue.main.async {
                     // Calculate percentage if we have enough frames
                     if !self.eyeStateWindow.isEmpty {
                         // Use cached count instead of filter
                         let closedPercentage = Double(self.closedFramesCount) / Double(self.eyeStateWindow.count)
-                        
+
                         // Always show percentage of closed eyes
                         let closedPercent = Int(closedPercentage * 100)
 
                         // Estimate time window (assuming ~10 fps)
                         let timeWindow = self.eyeStateWindow.count / 10
-                        
+
                         // Only update if message actually changed to avoid unnecessary string allocations
                         let newMessage = "Eyes closed \(closedPercent)% for last \(timeWindow) sec"
                         if self.statusMessage != newMessage {

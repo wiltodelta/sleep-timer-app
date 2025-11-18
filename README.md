@@ -22,7 +22,13 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 - 📊 Visual progress - circular progress indicator with remaining time
 - 🌙 Active timer indicator - menu bar icon changes when timer is running
 
-### Camera-Based Sleep Detection (NEW in v1.1.0)
+### Version 1.2.0 (Latest)
+- ⏱️ Menu bar timer countdown - see remaining time directly in the menu bar
+- 🎨 New adaptive app icon - supports Light and Dark modes automatically
+- ⚡️ Improved sleep mechanism - switched from `pmset` command to native IOKit API for better reliability and App Store compliance
+- 🐛 Bug fixes and performance improvements
+
+### Camera-Based Sleep Detection (v1.1.0)
 - 📷 Automatic sleep detection - monitors your eyes using the camera
 - 👁️ Eye tracking - uses Vision Framework with Eye Aspect Ratio (EAR) algorithm
 - 🛌 Smart timer - automatically starts 30-minute timer when eyes are closed
@@ -121,7 +127,7 @@ The app requires the following permissions:
 ## Technical Details
 
 - Built with Swift and SwiftUI
-- Uses `pmset sleepnow` command to sleep the Mac
+- Uses native `IOKit` API for reliable system sleep
 - Runs as menu bar only application (no dock icon)
 - Launch at Login support via `SMAppService`
 - Camera mode uses Vision Framework for face and eye detection

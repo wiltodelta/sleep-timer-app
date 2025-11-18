@@ -1,34 +1,19 @@
-# Xcode
-.DS_Store
+# Xcode / SwiftPM
 .build/
 .swiftpm/
-*.xcodeproj
-*.xcworkspace
-xcuserdata/
-DerivedData/
-*.moved-aside
-*.xccheckout
-*.xcscmblueprint
-
-# Swift Package Manager
-Packages/
-Package.resolved
-.build/
-
-# macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-Icon
-._*
-.Spotlight-V100
-.Trashes
+*.xcodeproj/
+*.xcworkspace/
 
 # Build artifacts
-*.app
-*.dSYM.zip
-*.dSYM
-*.zip
+Sleep Timer.app/
+*.app/
+.DS_Store
 
-# Xcode
-*.xcodeproj
+# Generated Resources (created by generate-assets.sh)
+Resources/Assets.car
+Resources/Assets.plist
+# We might want to keep AppIcon.icns if we want GitHub to show it, but usually it is generated
+Resources/AppIcon.icns
+
+# Temporary assets folder
+TemporaryAssets.xcassets/

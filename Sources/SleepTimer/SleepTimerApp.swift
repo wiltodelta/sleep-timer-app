@@ -23,14 +23,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let bundleID = Bundle.main.bundleIdentifier else {
             return false
         }
-        
+
         let runningApps = NSWorkspace.shared.runningApplications
         let instances = runningApps.filter { $0.bundleIdentifier == bundleID }
-        
+
         // More than one instance means another is already running
         return instances.count > 1
     }
-    
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Prevent multiple instances
         if isAnotherInstanceRunning() {
@@ -38,7 +38,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSApp.terminate(nil)
             return
         }
-        
+
         // Hide dock icon
         NSApp.setActivationPolicy(.accessory)
 
@@ -80,7 +80,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         updateStatusItem()
-        
+
         // Check for updates on launch (after 3 seconds delay)
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             self?.updateChecker.checkForUpdates(showNoUpdateAlert: false)
@@ -129,19 +129,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private func updateStatusItem() {
         if let button = statusItem.button {
             let iconName: String
+            var titleText = ""
 
             if timerManager.isTimerActive {
-                // Timer is active (any mode) - always moon.fill
                 iconName = "moon.fill"
-            } else if sleepManager.isCameraModeEnabled {
-                // Camera mode with no active timer - eye icon
-                iconName = "eye.fill"
+
+                let time = Int(max(0, timerManager.remainingTime))
+                let hours = time / 3600
+                let minutes = (time % 3600) / 60
+                let seconds = time % 60
+
+                if hours > 0 {
+                    titleText = String(format: " %d:%02d:%02d", hours, minutes, seconds)
+                } else {
+                    titleText = String(format: " %02d:%02d", minutes, seconds)
+                }
             } else {
-                // Manual mode with no active timer - regular moon
                 iconName = "moon"
             }
 
             button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Sleep Timer")
+
+            let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+            button.attributedTitle = NSAttributedString(string: titleText, attributes: [.font: font])
+            button.imagePosition = .imageLeft
         }
     }
 }

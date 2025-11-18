@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import IOKit.pwr_mgt
 
 public class TimerManager: ObservableObject {
     public static let shared = TimerManager()
@@ -55,14 +56,10 @@ public class TimerManager: ObservableObject {
     }
 
     private func putComputerToSleep() {
-        let task = Process()
-        task.launchPath = "/usr/bin/pmset"
-        task.arguments = ["sleepnow"]
+        let result = IOPMSleepSystem(io_connect_t(kIOMainPortDefault))
 
-        do {
-            try task.run()
-        } catch {
-            print("Failed to put computer to sleep: \(error)")
+        if result != kIOReturnSuccess {
+            print("Failed to put computer to sleep via IOKit (Error: \(result))")
         }
     }
 

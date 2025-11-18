@@ -26,6 +26,7 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 - **Privacy First**: All processing is done on-device using Apple's Vision Framework. No video data is stored or transmitted.
 - **Smart Wake**: Automatically cancels the pending timer if you open your eyes.
 - **Energy Efficient**: Optimized "Eye Aspect Ratio" (EAR) algorithm for minimal battery impact.
+- **Status Indication**: The timer icon changes to show active tracking status.
 
 ### 🎨 System Integration & Design
 - **Adaptive App Icon**: The application icon automatically changes between Light and Dark versions to match your macOS theme.
@@ -103,7 +104,6 @@ mv "Sleep Timer.app" /Applications/
 4. The app will start tracking your eyes
 5. When your eyes are closed for ~15 seconds, a 30-minute timer starts automatically
 6. Open your eyes for a few seconds to cancel the timer
-7. The menu bar shows an eye icon (👁️) when camera mode is active
 
 ## Permissions
 

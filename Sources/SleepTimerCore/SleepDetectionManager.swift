@@ -1,6 +1,7 @@
 import Foundation
 import AVFoundation
 import Vision
+import AppKit
 
 public final class SleepDetectionManager: NSObject, ObservableObject {
     public static let shared = SleepDetectionManager()
@@ -50,6 +51,10 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
     private var lastUIUpdateTime: Date?
     private let uiUpdateInterval: TimeInterval = 1.0 // Update UI max 1 time per second
 
+    // Activity check timer (2-hour periodic check)
+    private var activityCheckTimer: Timer?
+    private let activityCheckInterval: TimeInterval = 2 * 60 * 60 // 2 hours
+
     private override init() {
         // Set tolerance to 25% of window size (~15 seconds at 10 fps for 60-second window)
         self.maxMissedFrames = Int(Double(windowSize) * 0.25)
@@ -61,8 +66,10 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
 
         if enabled {
             requestAuthorizationAndStart()
+            startActivityCheckTimer()
         } else {
             stopSession()
+            stopActivityCheckTimer()
             resetDetectionState()
             DispatchQueue.main.async {
                 self.statusMessage = "Camera tracking is off."
@@ -505,6 +512,91 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
         let ear = (verticalDist1 + verticalDist2) / (2.0 * horizontalDist)
 
         return Double(ear)
+    }
+
+    // MARK: - Activity Check Timer (2-hour periodic check)
+
+    private func startActivityCheckTimer() {
+        stopActivityCheckTimer()
+
+        activityCheckTimer = Timer.scheduledTimer(withTimeInterval: activityCheckInterval, repeats: true) { [weak self] _ in
+            self?.showActivityCheckDialog()
+        }
+    }
+
+    private func stopActivityCheckTimer() {
+        activityCheckTimer?.invalidate()
+        activityCheckTimer = nil
+    }
+
+    private func showActivityCheckDialog() {
+        DispatchQueue.main.async {
+            // Bring app to foreground to show alert
+            NSApp.setActivationPolicy(.regular)
+            NSApp.activate(ignoringOtherApps: true)
+
+            let alert = NSAlert()
+            alert.messageText = "Are you asleep?"
+            alert.informativeText = "You have been in camera mode for 2 hours."
+            alert.alertStyle = .informational
+            alert.addButton(withTitle: "Not Yet")
+            alert.addButton(withTitle: "Yes, Sleep Now")
+
+            // Create a custom label for countdown
+            let countdownLabel = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 16))
+            countdownLabel.isEditable = false
+            countdownLabel.isBordered = false
+            countdownLabel.backgroundColor = .clear
+            countdownLabel.alignment = .center
+            countdownLabel.font = NSFont.systemFont(ofSize: 11)
+            countdownLabel.textColor = .secondaryLabelColor
+            alert.accessoryView = countdownLabel
+
+            // Countdown state
+            var remainingSeconds = 30
+            var userResponded = false
+
+            // Initial countdown text
+            countdownLabel.stringValue = "Auto-sleep in \(remainingSeconds) seconds..."
+
+            // Create a countdown timer on the main run loop
+            let countdownTimer = Timer(timeInterval: 1.0, repeats: true) { timer in
+                remainingSeconds -= 1
+
+                if remainingSeconds > 0 {
+                    countdownLabel.stringValue = "Auto-sleep in \(remainingSeconds) seconds..."
+                } else {
+                    // Time's up - force sleep
+                    timer.invalidate()
+
+                    if !userResponded {
+                        NSLog("DEBUG: Auto-closing alert after 30 seconds")
+                        NSApp.abortModal()
+                    }
+                }
+            }
+
+            // Add timer to main run loop so it fires during modal session
+            RunLoop.main.add(countdownTimer, forMode: .modalPanel)
+
+            let response = alert.runModal()
+            userResponded = true
+            countdownTimer.invalidate()
+
+            // Return to accessory mode
+            NSApp.setActivationPolicy(.accessory)
+
+            if response == .alertSecondButtonReturn {
+                // User chose "Yes, Sleep Now"
+                TimerManager.shared.sleepNow()
+            } else if response == .alertFirstButtonReturn {
+                // User chose "Not Yet" - restart timer
+                self.startActivityCheckTimer()
+            } else {
+                // Alert was closed by timer (auto-sleep)
+                TimerManager.shared.sleepNow()
+            }
+        }
     }
 }
 

@@ -55,6 +55,12 @@ public struct ContentView: View {
             // Notify status bar to update icon on launch
             NotificationCenter.default.post(name: NSNotification.Name("CameraModeChanged"), object: nil)
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("CameraModeDisabled"))) { _ in
+            // Switch back to manual mode when camera mode is disabled externally (e.g., after system wake)
+            if selectedMode == .camera {
+                selectedMode = .manual
+            }
+        }
         .onChange(of: selectedMode) { newMode in
             // Stop active timer when switching modes
             if timerManager.isTimerActive {

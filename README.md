@@ -23,14 +23,15 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 
 ### 📷 Intelligent Sleep Detection
 - **Auto-Sleep**: Automatically starts a 30-minute timer when it detects your eyes are closed for ~15 seconds.
+- **Activity Check**: After 2 hours in camera mode, prompts you to confirm if you're still awake. If no response within 30 seconds, automatically puts the Mac to sleep.
 - **Privacy First**: All processing is done on-device using Apple's Vision Framework. No video data is stored or transmitted.
 - **Smart Wake**: Automatically cancels the pending timer if you open your eyes.
 - **Energy Efficient**: Optimized "Eye Aspect Ratio" (EAR) algorithm for minimal battery impact.
-- **Status Indication**: The timer icon changes to show active tracking status.
+- **Auto Mode Switch**: Automatically returns to manual mode before putting the computer to sleep.
 
 ### 🎨 System Integration & Design
 - **Adaptive App Icon**: The application icon automatically changes between Light and Dark versions to match your macOS theme.
-- **Native Architecture**: Uses the official `IOKit` API for reliable and safe system sleep (App Sandbox compliant).
+- **Native Architecture**: Uses `pmset` command for reliable and safe system sleep.
 - **Modern UI**: "Liquid Glass" design language that fits perfectly into macOS.
 - **Launch at Login**: Option to start the app automatically in the background.
 
@@ -104,6 +105,9 @@ mv "Sleep Timer.app" /Applications/
 4. The app will start tracking your eyes
 5. When your eyes are closed for ~15 seconds, a 30-minute timer starts automatically
 6. Open your eyes for a few seconds to cancel the timer
+7. Every 2 hours, you'll be asked if you're still awake
+   - Respond within 30 seconds to continue
+   - No response will put the Mac to sleep automatically
 
 ## Permissions
 
@@ -119,13 +123,14 @@ The app requires the following permissions:
 ## Technical Details
 
 - Built with Swift and SwiftUI
-- Uses native `IOKit` API for reliable system sleep
+- Uses `pmset sleepnow` command for reliable system sleep
 - Runs as menu bar only application (no dock icon)
 - Launch at Login support via `SMAppService`
 - Camera mode uses Vision Framework for face and eye detection
 - Eye Aspect Ratio (EAR) algorithm for sleep detection
 - Optimized performance with cached frame counting (O(1) complexity)
 - Minimal resource usage and energy efficient
+- Automatic mode switching before sleep to ensure clean state
 
 ## Releases
 
@@ -142,8 +147,8 @@ git push origin main
 
 2. **Create and push a git tag:**
 ```bash
-git tag -a v1.2.0 -m "Release v1.2.0"
-git push origin v1.2.0
+git tag -a v1.3.0 -m "Release v1.3.0: Activity check in camera mode"
+git push origin v1.3.0
 ```
 
 3. **GitHub Actions will automatically:**

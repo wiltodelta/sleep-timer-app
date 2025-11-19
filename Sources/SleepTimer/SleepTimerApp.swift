@@ -49,7 +49,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            if let image = NSImage(named: "MenuIcon") {
+            if let originalImage = NSImage(named: "MenuIcon"),
+               let image = originalImage.copy() as? NSImage {
                 image.size = NSSize(width: 18, height: 18)
                 button.image = image
             }

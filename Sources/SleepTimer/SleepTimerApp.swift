@@ -151,7 +151,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 iconName = "MenuIcon"
             }
 
-            if let image = NSImage(named: iconName) {
+            if let originalImage = NSImage(named: iconName),
+               let image = originalImage.copy() as? NSImage {
                 image.size = NSSize(width: 18, height: 18)
                 button.image = image
             }

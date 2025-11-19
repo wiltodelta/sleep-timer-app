@@ -86,16 +86,13 @@ cat > "$ICONSET_DIR/Contents.json" <<EOF
 EOF
 
 # 3b. Add menu bar icons to Assets
-# Copy menu bar icons
-if [ -f "Menu Icon/menu-icon@2x.png" ]; then
+# Copy menu bar icons and create Contents.json only if files exist
+if [ -f "Menu Icon/menu-icon@2x.png" ] && [ -f "Menu Icon/menu-icon-active@2x.png" ]; then
     cp "Menu Icon/menu-icon@2x.png" "$MENU_ICON_DIR/menu-icon@2x.png"
-fi
-if [ -f "Menu Icon/menu-icon-active@2x.png" ]; then
     cp "Menu Icon/menu-icon-active@2x.png" "$MENU_ACTIVE_DIR/menu-icon-active@2x.png"
-fi
 
-# Create Contents.json for MenuIcon
-cat > "$MENU_ICON_DIR/Contents.json" <<EOF
+    # Create Contents.json for MenuIcon
+    cat > "$MENU_ICON_DIR/Contents.json" <<EOF
 {
   "images" : [
     {
@@ -114,8 +111,8 @@ cat > "$MENU_ICON_DIR/Contents.json" <<EOF
 }
 EOF
 
-# Create Contents.json for MenuIconActive
-cat > "$MENU_ACTIVE_DIR/Contents.json" <<EOF
+    # Create Contents.json for MenuIconActive
+    cat > "$MENU_ACTIVE_DIR/Contents.json" <<EOF
 {
   "images" : [
     {
@@ -133,6 +130,9 @@ cat > "$MENU_ACTIVE_DIR/Contents.json" <<EOF
   }
 }
 EOF
+else
+    echo "Warning: Menu icon files not found in 'Menu Icon/', skipping menu icons"
+fi
 
 # 4. Compile Assets.car using actool
 echo "Compiling Assets.car..."

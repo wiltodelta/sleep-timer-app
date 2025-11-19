@@ -10,10 +10,7 @@ Sleep Timer.app/
 .DS_Store
 
 # Generated Resources (created by generate-assets.sh)
-Resources/Assets.car
-Resources/Assets.plist
-# We might want to keep AppIcon.icns if we want GitHub to show it, but usually it is generated
-Resources/AppIcon.icns
+Resources/
 
 # Temporary assets folder
 TemporaryAssets.xcassets/

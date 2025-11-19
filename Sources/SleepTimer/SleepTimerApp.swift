@@ -49,7 +49,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "moon", accessibilityDescription: "Sleep Timer")
+            if let image = NSImage(named: "MenuIcon") {
+                image.size = NSSize(width: 18, height: 18)
+                button.image = image
+            }
             button.action = #selector(togglePopover)
             button.target = self
         }
@@ -132,7 +135,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             var titleText = ""
 
             if timerManager.isTimerActive {
-                iconName = "moon.fill"
+                iconName = "MenuIconActive"
 
                 let time = Int(max(0, timerManager.remainingTime))
                 let hours = time / 3600
@@ -145,10 +148,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     titleText = String(format: " %02d:%02d", minutes, seconds)
                 }
             } else {
-                iconName = "moon"
+                iconName = "MenuIcon"
             }
 
-            button.image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Sleep Timer")
+            if let image = NSImage(named: iconName) {
+                image.size = NSSize(width: 18, height: 18)
+                button.image = image
+            }
 
             let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
             button.attributedTitle = NSAttributedString(string: titleText, attributes: [.font: font])

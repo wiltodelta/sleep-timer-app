@@ -65,10 +65,22 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
         self.isCameraModeEnabled = enabled
 
         if enabled {
-            requestAuthorizationAndStart()
+            // Update status immediately so UI doesn't feel stuck
+            DispatchQueue.main.async {
+                if self.statusMessage != "Camera access was denied." {
+                    self.statusMessage = "Starting camera..."
+                }
+            }
+            
+            // Perform setup on a background queue to prevent main thread blocking
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.requestAuthorizationAndStart()
+            }
             startActivityCheckTimer()
         } else {
-            stopSession()
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                self?.stopSession()
+            }
             stopActivityCheckTimer()
             resetDetectionState()
             DispatchQueue.main.async {
@@ -116,6 +128,10 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
         sessionQueue.async {
             if self.session.isRunning {
                 return
+            }
+            
+            DispatchQueue.main.async {
+                self.statusMessage = "Configuring camera..."
             }
 
             self.configureSessionIfNeeded()

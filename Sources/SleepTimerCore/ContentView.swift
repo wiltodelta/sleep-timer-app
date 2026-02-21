@@ -27,17 +27,12 @@ public struct ContentView: View {
                     case .manual:
                         if timerManager.isTimerActive {
                             ActiveTimerView()
-                                .equatable()
-                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                        } else {
+                                } else {
                             InactiveTimerView(selectedHours: $selectedHours)
-                                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                        }
+                                }
                     case .camera:
                         CameraModeView()
-                            .equatable()
-                            .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                    }
+                            }
                 }
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedMode)
                 .animation(.spring(response: 0.35, dampingFraction: 0.8), value: timerManager.isTimerActive)
@@ -49,7 +44,6 @@ public struct ContentView: View {
         }
         .background(.regularMaterial)
         .onAppear {
-            updateWindowSize(for: selectedMode)
             sleepManager.setCameraModeEnabled(selectedMode == .camera)
 
             // Notify status bar to update icon on launch
@@ -67,7 +61,6 @@ public struct ContentView: View {
                 timerManager.stopTimer()
             }
 
-            updateWindowSize(for: newMode)
             sleepManager.setCameraModeEnabled(newMode == .camera)
 
             // Notify status bar to update icon
@@ -75,16 +68,7 @@ public struct ContentView: View {
         }
     }
 
-    private func updateWindowSize(for mode: TimerMode) {
-        let size = NSSize(width: 360, height: 420)
-
-        DispatchQueue.main.async {
-            if let window = NSApp.windows.first {
-                window.setContentSize(size)
-            }
-        }
     }
-}
 
 enum TimerMode {
     case manual
@@ -266,14 +250,10 @@ struct PresetButton: View {
     }
 }
 
-struct ActiveTimerView: View, Equatable {
+struct ActiveTimerView: View {
     @StateObject private var timerManager = TimerManager.shared
 
-    static func == (lhs: ActiveTimerView, rhs: ActiveTimerView) -> Bool {
-        // Only redraw if timer state actually changes (not every second)
-        return lhs.timerManager.isTimerActive == rhs.timerManager.isTimerActive
-    }
-
+    
     var body: some View {
         VStack(spacing: 0) {
             // Circular progress
@@ -370,20 +350,12 @@ struct ActiveTimerView: View, Equatable {
     }
 }
 
-struct CameraModeView: View, Equatable {
+struct CameraModeView: View {
     @StateObject private var sleepManager = SleepDetectionManager.shared
     @StateObject private var timerManager = TimerManager.shared
     @Environment(\.openURL) private var openURL
 
-    static func == (lhs: CameraModeView, rhs: CameraModeView) -> Bool {
-        // Only redraw if actual state changes, not on every status message update
-        return lhs.sleepManager.isCameraModeEnabled == rhs.sleepManager.isCameraModeEnabled &&
-               lhs.sleepManager.isCameraAuthorized == rhs.sleepManager.isCameraAuthorized &&
-               lhs.sleepManager.isSessionRunning == rhs.sleepManager.isSessionRunning &&
-               lhs.sleepManager.isUserAsleep == rhs.sleepManager.isUserAsleep &&
-               lhs.timerManager.isTimerActive == rhs.timerManager.isTimerActive
-    }
-
+    
     var body: some View {
         ZStack {
             // Subtle background gradient
@@ -401,10 +373,8 @@ struct CameraModeView: View, Equatable {
                 introSection
                     .transition(.opacity.combined(with: .move(edge: .top)))
                 statusCard
-                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                timerCard
-                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                Spacer(minLength: 0)
+                    timerCard
+                    Spacer(minLength: 0)
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)

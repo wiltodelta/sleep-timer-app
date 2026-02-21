@@ -24,8 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return false
         }
 
-        let runningApps = NSWorkspace.shared.runningApplications
-        let instances = runningApps.filter { $0.bundleIdentifier == bundleID }
+        let instances = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
 
         // More than one instance means another is already running
         return instances.count > 1

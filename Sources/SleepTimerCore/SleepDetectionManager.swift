@@ -570,7 +570,6 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
 
             // Countdown state
             var remainingSeconds = 30
-            var userResponded = false
 
             // Initial countdown text
             countdownLabel.stringValue = "Auto-sleep in \(remainingSeconds) seconds..."
@@ -585,10 +584,8 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
                     // Time's up - force sleep
                     timer.invalidate()
 
-                    if !userResponded {
-                        NSLog("DEBUG: Auto-closing alert after 30 seconds")
-                        NSApp.abortModal()
-                    }
+                    NSLog("DEBUG: Auto-closing alert after 30 seconds")
+                    NSApp.abortModal()
                 }
             }
 
@@ -596,7 +593,6 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
             RunLoop.main.add(countdownTimer, forMode: .modalPanel)
 
             let response = alert.runModal()
-            userResponded = true
             countdownTimer.invalidate()
 
             // Return to accessory mode

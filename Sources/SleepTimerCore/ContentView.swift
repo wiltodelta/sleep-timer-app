@@ -5,7 +5,7 @@ public struct ContentView: View {
     @StateObject private var timerManager = TimerManager.shared
     @StateObject private var sleepManager = SleepDetectionManager.shared
     @State private var selectedMode: TimerMode = .manual
-    @State private var selectedHours: Double = 1.0
+    @State private var selectedHours: Double = 2.0
 
     public init() {}
 
@@ -389,7 +389,7 @@ struct CameraModeView: View {
             Text("Camera Sleep Mode")
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
 
-            Text("Sleep Timer gently watches for closed eyes and auto-starts a 30-minute timer. Open your eyes for a few seconds to cancel it.")
+            Text("Sleep Timer gently watches for closed eyes and auto-starts a 30-minute timer. Open your eyes for a few seconds to cancel it. It will also auto-sleep after 2 hours of tracking.")
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

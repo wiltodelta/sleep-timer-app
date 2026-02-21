@@ -32,13 +32,13 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 ### 🎨 System Integration & Design
 - **Adaptive App Icon**: The application icon automatically changes between Light and Dark versions to match your macOS theme.
 - **Native Architecture**: Uses `pmset` command for reliable and safe system sleep.
-- **Modern UI**: "Liquid Glass" design language that fits perfectly into macOS.
+- **Modern UI**: "Liquid Glass" design language that fits perfectly into macOS Sonoma, Sequoia, and the upcoming Tahoe.
 - **Launch at Login**: Option to start the app automatically in the background.
 
 ## Requirements
 
-- macOS 13.0 (Ventura) or later
-- Apple Silicon (M1/M2/M3) or Intel Mac (runs via Rosetta 2)
+- macOS 13.0 (Ventura) or later (Ready for macOS 26 Tahoe)
+- Apple Silicon (M1/M2/M3/M4) or Intel Mac (runs via Rosetta 2 on older macOS)
 - Xcode 15.0 or later (for building from source)
 
 ## Installation

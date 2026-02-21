@@ -21,21 +21,20 @@ public struct ContentView: View {
             .padding(.bottom, 12)
 
             Divider()
-
-                Group {
-                    switch selectedMode {
-                    case .manual:
-                        if timerManager.isTimerActive {
-                            ActiveTimerView()
-                                } else {
-                            InactiveTimerView(selectedHours: $selectedHours)
-                                }
-                    case .camera:
-                        CameraModeView()
-                            }
+            Group {
+                switch selectedMode {
+                case .manual:
+                    if timerManager.isTimerActive {
+                        ActiveTimerView()
+                    } else {
+                        InactiveTimerView(selectedHours: $selectedHours)
+                    }
+                case .camera:
+                    CameraModeView()
                 }
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedMode)
-                .animation(.spring(response: 0.35, dampingFraction: 0.8), value: timerManager.isTimerActive)
+            }
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: selectedMode)
+            .animation(.spring(response: 0.35, dampingFraction: 0.8), value: timerManager.isTimerActive)
 
             Divider()
 
@@ -400,7 +399,7 @@ struct CameraModeView: View {
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(.ultraThinMaterial)
                 .shadow(color: .black.opacity(0.03), radius: 4, x: 0, y: 2)
         )
@@ -448,10 +447,10 @@ struct CameraModeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(.ultraThinMaterial)
 
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
@@ -465,7 +464,7 @@ struct CameraModeView: View {
             }
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(
                     LinearGradient(
                         gradient: Gradient(colors: [
@@ -478,8 +477,8 @@ struct CameraModeView: View {
                     lineWidth: 1
                 )
         )
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-        .shadow(color: .black.opacity(0.03), radius: 2, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 6)
+        .shadow(color: .black.opacity(0.04), radius: 3, x: 0, y: 1)
     }
 
     private var timerCard: some View {
@@ -504,10 +503,10 @@ struct CameraModeView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             ZStack {
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(.ultraThinMaterial)
 
-                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
                     .fill(
                         LinearGradient(
                             gradient: Gradient(colors: [
@@ -521,7 +520,7 @@ struct CameraModeView: View {
             }
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .strokeBorder(
                     LinearGradient(
                         gradient: Gradient(colors: [
@@ -534,8 +533,8 @@ struct CameraModeView: View {
                     lineWidth: 1
                 )
         )
-        .shadow(color: .black.opacity(0.05), radius: 8, x: 0, y: 4)
-        .shadow(color: .black.opacity(0.03), radius: 2, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.08), radius: 14, x: 0, y: 6)
+        .shadow(color: .black.opacity(0.04), radius: 3, x: 0, y: 1)
     }
 
     private func statusRow(icon: String, color: Color, title: String, detail: String) -> some View {

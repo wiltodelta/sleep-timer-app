@@ -6,3 +6,7 @@ You are a **principal Swift/macOS engineer** maintaining a menu bar app that aut
 
 - `./run.sh` — build and run for development
 - `./create-app.sh` — create standalone .app bundle
+
+## Test and lint
+
+- `bash maintain.sh` — swiftlint lint --fix, swift test, swift build -c release

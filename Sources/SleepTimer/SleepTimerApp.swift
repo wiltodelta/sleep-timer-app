@@ -18,6 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var timerManager = TimerManager.shared
     private var sleepManager = SleepDetectionManager.shared
     private var updateChecker = UpdateChecker.shared
+    private var autoActivation = AutoActivationManager.shared
 
     private func isAnotherInstanceRunning() -> Bool {
         guard let bundleID = Bundle.main.bundleIdentifier else {
@@ -83,6 +84,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         updateStatusItem()
+
+        // Start watching for idle time to auto-arm the timer at night
+        autoActivation.startMonitoring()
 
         // Check for updates on launch (after 3 seconds delay)
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in

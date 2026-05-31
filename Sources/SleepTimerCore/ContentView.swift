@@ -5,7 +5,7 @@ public struct ContentView: View {
     @StateObject private var timerManager = TimerManager.shared
     @StateObject private var sleepManager = SleepDetectionManager.shared
     @State private var selectedMode: TimerMode = .manual
-    @State private var selectedHours: Double = 2.0
+    @State private var selectedHours: Double = 1.5
 
     public init() {}
 
@@ -87,6 +87,8 @@ struct CommonSettingsView: View {
 
     var body: some View {
         VStack(spacing: 8) {
+            AutoActivationSettingsView()
+
             Toggle(isOn: $launchManager.isEnabled) {
                 Text("Launch at Login")
                     .font(.system(size: 12))
@@ -124,6 +126,70 @@ struct CommonSettingsView: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
+    }
+}
+
+struct AutoActivationSettingsView: View {
+    @StateObject private var manager = AutoActivationManager.shared
+
+    private let hourOptions = [20, 21, 22, 23, 0, 1]
+    private let idleOptions = [10, 15, 20, 30, 45, 60]
+    private let durationOptions: [Double] = [0.5, 1, 1.5, 2, 3]
+
+    var body: some View {
+        VStack(spacing: 6) {
+            Toggle(isOn: $manager.isEnabled) {
+                Text("Auto-start timer when idle at night")
+                    .font(.system(size: 12))
+            }
+            .toggleStyle(.checkbox)
+            .controlSize(.small)
+
+            if manager.isEnabled {
+                HStack(spacing: 8) {
+                    optionMenu(hourLabel(manager.activeAfterHour), options: hourOptions, label: hourLabel) {
+                        manager.activeAfterHour = $0
+                    }
+                    optionMenu("\(manager.idleMinutes)m idle", options: idleOptions, label: { "\($0) min" }) {
+                        manager.idleMinutes = $0
+                    }
+                    optionMenu(durationLabel(manager.timerHours), options: durationOptions, label: durationLabel) {
+                        manager.timerHours = $0
+                    }
+                }
+                .controlSize(.small)
+                .font(.system(size: 11))
+            }
+        }
+    }
+
+    private func optionMenu<T: Hashable>(
+        _ title: String,
+        options: [T],
+        label: @escaping (T) -> String,
+        select: @escaping (T) -> Void
+    ) -> some View {
+        Menu(title) {
+            ForEach(options, id: \.self) { option in
+                Button(label(option)) { select(option) }
+            }
+        }
+    }
+
+    private func hourLabel(_ hour: Int) -> String {
+        "After \(String(format: "%02d:00", hour))"
+    }
+
+    private func durationLabel(_ hours: Double) -> String {
+        if hours < 1 {
+            return "\(Int(hours * 60))m timer"
+        }
+        if hours == floor(hours) {
+            return "\(Int(hours))h timer"
+        }
+        let whole = Int(hours)
+        let minutes = Int((hours - Double(whole)) * 60)
+        return "\(whole)h \(minutes)m timer"
     }
 }
 
@@ -389,7 +455,7 @@ struct CameraModeView: View {
             Text("Camera Sleep Mode")
                 .font(.system(size: 18, weight: .semibold, design: .rounded))
 
-            Text("Sleep Timer gently watches for closed eyes and auto-starts a 30-minute timer. Open your eyes for a few seconds to cancel it. It will also auto-sleep after 2 hours of tracking.")
+            Text("Sleep Timer gently watches for closed eyes and auto-starts a 30-minute timer. Open your eyes for a few seconds to cancel it. It will also auto-sleep after 1.5 hours of tracking.")
                 .font(.system(size: 11))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

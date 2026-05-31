@@ -11,7 +11,13 @@ public class TimerManager: ObservableObject {
     private var timer: Timer?
     private var targetDate: Date?
 
-    private init() {}
+    // Seam for tests: invoked when the timer reaches zero. Defaults to putting
+    // the computer to sleep; tests override it so the suite never sleeps the machine.
+    var sleepHandler: () -> Void = {}
+
+    private init() {
+        sleepHandler = { [weak self] in self?.putComputerToSleep() }
+    }
 
     public func startTimer(hours: Double) {
         stopTimer()
@@ -47,11 +53,9 @@ public class TimerManager: ObservableObject {
         remainingTime = targetDate.timeIntervalSinceNow
 
         if remainingTime <= 0 {
-            // Notify that timer finished (so we can disable camera mode)
-            NotificationCenter.default.post(name: NSNotification.Name("TimerDidFinish"), object: nil)
-
             stopTimer()
-            putComputerToSleep()
+            sleepHandler()
+            return
         }
 
         notifyTimerUpdated()

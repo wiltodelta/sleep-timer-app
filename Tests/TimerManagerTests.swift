@@ -3,14 +3,17 @@ import XCTest
 
 final class TimerManagerTests: XCTestCase {
     var timerManager: TimerManager!
-    
+    var didTriggerSleep = false
+
     override func setUp() {
         super.setUp()
-        // Create a fresh instance for each test
         timerManager = TimerManager.shared
         timerManager.stopTimer()
+        // Override the sleep seam so the suite never actually sleeps the machine.
+        didTriggerSleep = false
+        timerManager.sleepHandler = { [weak self] in self?.didTriggerSleep = true }
     }
-    
+
     override func tearDown() {
         timerManager.stopTimer()
         super.tearDown()
@@ -237,18 +240,17 @@ final class TimerManagerTests: XCTestCase {
     func testVeryShortTimer() {
         // Given
         let expectation = self.expectation(description: "Very short timer completes")
-        expectation.isInverted = false // We expect the timer to stop
-        
+
         // When
         timerManager.startTimer(hours: 0.0003) // ~1 second
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             // Then
-            // Note: Timer will try to sleep computer, but test continues
             XCTAssertFalse(self.timerManager.isTimerActive, "Timer should stop after completion")
+            XCTAssertTrue(self.didTriggerSleep, "Sleep handler should fire when the timer reaches zero")
             expectation.fulfill()
         }
-        
+
         waitForExpectations(timeout: 3.0)
     }
     

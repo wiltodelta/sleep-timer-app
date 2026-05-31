@@ -44,6 +44,9 @@ jobs:
         rm -rf ~/Library/Caches/org.swift.swiftpm
         rm -rf ~/Library/Developer/Xcode/DerivedData
     
+    - name: Run Tests
+      run: swift test
+
     - name: Create App Bundle
       run: |
         chmod +x create-app.sh

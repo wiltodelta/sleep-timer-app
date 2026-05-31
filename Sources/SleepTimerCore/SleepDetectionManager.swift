@@ -51,9 +51,9 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
     private var lastUIUpdateTime: Date?
     private let uiUpdateInterval: TimeInterval = 1.0 // Update UI max 1 time per second
 
-    // Activity check timer (2-hour periodic check)
+    // Activity check timer (1.5-hour periodic check)
     private var activityCheckTimer: Timer?
-    private let activityCheckInterval: TimeInterval = 2 * 60 * 60 // 2 hours
+    private let activityCheckInterval: TimeInterval = 1.5 * 60 * 60 // 1.5 hours
 
     private override init() {
         // Set tolerance to 25% of window size (~15 seconds at 10 fps for 60-second window)
@@ -333,6 +333,7 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
                     self.eyeStateWindow.removeAll()
                     self.closedFramesCount = 0 // Reset cached count when clearing window
                     self.currentEyeState = false
+                    self.consecutiveClosedFrames = 0 // Reset so a lost face can't carry over into early sleep detection
                     DispatchQueue.main.async {
                         if self.isSessionRunning {
                             self.statusMessage = "Looking for your face..."
@@ -530,7 +531,7 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
         return Double(ear)
     }
 
-    // MARK: - Activity Check Timer (2-hour periodic check)
+    // MARK: - Activity Check Timer (1.5-hour periodic check)
 
     private func startActivityCheckTimer() {
         stopActivityCheckTimer()
@@ -553,7 +554,7 @@ public final class SleepDetectionManager: NSObject, ObservableObject {
 
             let alert = NSAlert()
             alert.messageText = "Are you asleep?"
-            alert.informativeText = "You have been in camera mode for 2 hours."
+            alert.informativeText = "You have been in camera mode for 1.5 hours."
             alert.alertStyle = .informational
             alert.addButton(withTitle: "Not Yet")
             alert.addButton(withTitle: "Yes, Sleep Now")

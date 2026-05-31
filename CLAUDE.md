@@ -10,3 +10,6 @@ You are a **principal Swift/macOS engineer** maintaining a menu bar app that aut
 ## Test and lint
 
 - `bash maintain.sh` — swiftlint lint --fix, swift test, swift build -c release
+- `swift test` requires full Xcode (XCTest is absent from Command Line Tools); `swift build`/`./create-app.sh` work on CLT alone.
+- Stale `.build` after the repo moves paths fails with a `SwiftShims ... module cache path` error — fix with `rm -rf .build`.
+- Tests must override the manager seams (e.g. `TimerManager.sleepHandler`) — otherwise `swift test` runs the real `pmset sleepnow` and sleeps the Mac. Managers inject closures + `UserDefaults(suiteName:)` for testability.

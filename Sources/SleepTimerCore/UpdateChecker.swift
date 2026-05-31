@@ -6,6 +6,7 @@ public class UpdateChecker: ObservableObject {
 
     private let githubRepo = "wiltodelta/sleep-timer-app"
     private let currentVersion: String
+    private let skippedVersionKey = "skippedVersion"
 
     @Published public var isCheckingForUpdates = false
 
@@ -73,6 +74,12 @@ public class UpdateChecker: ObservableObject {
         let latestVersion = release.tagName.replacingOccurrences(of: "v", with: "")
 
         if isNewerVersion(latestVersion, than: currentVersion) {
+            // Honor a previously skipped version, but only for automatic checks.
+            // A manual "Check for Updates" always surfaces the available version.
+            if !showNoUpdateAlert,
+               UserDefaults.standard.string(forKey: skippedVersionKey) == latestVersion {
+                return
+            }
             DispatchQueue.main.async {
                 self.showUpdateAlert(version: latestVersion, url: release.htmlURL, releaseNotes: release.body)
             }
@@ -123,7 +130,7 @@ public class UpdateChecker: ObservableObject {
                 NSWorkspace.shared.open(downloadURL)
             }
         case .alertSecondButtonReturn: // Skip
-            UserDefaults.standard.set(version, forKey: "skippedVersion")
+            UserDefaults.standard.set(version, forKey: skippedVersionKey)
         default: // Remind Me Later
             break
         }

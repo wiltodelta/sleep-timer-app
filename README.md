@@ -19,11 +19,12 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 - **Flexible Duration**: Set timers anywhere from 15 minutes to 12 hours.
 - **Quick Presets**: One-click access to common durations (15m, 30m, 1h, 1.5h, 2h, 3h, 4h, 6h).
 - **Easy Extension**: Add +5, +15, +30, or +60 minutes to an active timer instantly.
+- **Auto-Start When Idle**: Optionally arm a timer on its own once the Mac sits idle for a set number of minutes inside a nightly window (so you never forget to start it).
 - **Visual Feedback**: Circular progress ring and dynamic menu bar icons (moon/filled moon).
 
 ### 📷 Intelligent Sleep Detection
 - **Auto-Sleep**: Automatically starts a 30-minute timer when it detects your eyes are closed for ~15 seconds.
-- **Activity Check**: After 2 hours in camera mode, prompts you to confirm if you're still awake. If no response within 30 seconds, automatically puts the Mac to sleep.
+- **Activity Check**: After 1.5 hours in camera mode, prompts you to confirm if you're still awake. If no response within 30 seconds, automatically puts the Mac to sleep.
 - **Privacy First**: All processing is done on-device using Apple's Vision Framework. No video data is stored or transmitted.
 - **Smart Wake**: Automatically cancels the pending timer if you open your eyes.
 - **Energy Efficient**: Optimized "Eye Aspect Ratio" (EAR) algorithm for minimal battery impact.
@@ -98,6 +99,12 @@ mv "Sleep Timer.app" /Applications/
    - Add more time if needed
    - Cancel the timer
 
+### Auto-Start When Idle
+1. Open the menu bar popover and enable "Auto-start timer when idle at night"
+2. Pick the hour the window opens (the window runs overnight until 8:00), how many idle minutes should pass, and the timer length
+3. When the Mac sits idle past that threshold inside the window, a regular timer arms automatically
+4. It stays out of the way while a timer is already running or while Camera Mode is active
+
 ### Camera Mode
 1. Click the moon icon in your menu bar
 2. Select "Camera" mode at the top
@@ -105,7 +112,7 @@ mv "Sleep Timer.app" /Applications/
 4. The app will start tracking your eyes
 5. When your eyes are closed for ~15 seconds, a 30-minute timer starts automatically
 6. Open your eyes for a few seconds to cancel the timer
-7. Every 2 hours, you'll be asked if you're still awake
+7. Every 1.5 hours, you'll be asked if you're still awake
    - Respond within 30 seconds to continue
    - No response will put the Mac to sleep automatically
 
@@ -114,7 +121,7 @@ mv "Sleep Timer.app" /Applications/
 The app requires the following permissions:
 
 **Required:**
-- System Events permission - to put your Mac to sleep
+- None. Sleep is triggered via the `pmset sleepnow` command, which needs no special permission.
 
 **Optional (for Camera Mode):**
 - Camera access - to detect when your eyes are closed
@@ -128,6 +135,7 @@ The app requires the following permissions:
 - Launch at Login support via `SMAppService`
 - Camera mode uses Vision Framework for face and eye detection
 - Eye Aspect Ratio (EAR) algorithm for sleep detection
+- Idle auto-start reads system idle time from IOKit (`IOHIDSystem` `HIDIdleTime`); no extra permission required
 - Optimized performance with cached frame counting (O(1) complexity)
 - Minimal resource usage and energy efficient
 - Automatic mode switching before sleep to ensure clean state
@@ -183,8 +191,9 @@ swift test --verbose
 ```
 
 Test coverage includes:
-- **TimerManager**: Timer lifecycle, add time, notifications
+- **TimerManager**: Timer lifecycle, add time, notifications, sleep trigger seam
 - **SleepDetectionManager**: Camera mode, state management, initialization
+- **AutoActivationManager**: Nightly window logic, idle-threshold activation decisions
 
 ### Building from Source
 
@@ -219,8 +228,8 @@ MIT License - feel free to use this project for personal or commercial purposes.
 - **Why this happens**: The app is not notarized by Apple, so macOS marks it as potentially unsafe
 
 **Timer doesn't put Mac to sleep:**
-- Check System Settings > Privacy & Security > Automation
-- Ensure the app has permission to control System Events
+- Sleep is triggered via the `pmset sleepnow` command, which needs no special permission
+- Make sure no other process is preventing sleep (for example `caffeinate`, or an app holding a power-management assertion); check with `pmset -g assertions`
 
 **Camera mode not working:**
 - Check System Settings > Privacy & Security > Camera

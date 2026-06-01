@@ -21,10 +21,12 @@ A menu bar application for macOS that allows you to set a sleep timer to automat
 - **Quick Presets**: One-click access to common durations (15m, 30m, 1h, 1.5h, 2h, 3h, 4h, 6h).
 - **Easy Extension**: Add +5, +15, +30, or +60 minutes to an active timer instantly.
 - **Auto-Start When Idle**: Optionally arm a timer on its own once the Mac sits idle for a set number of minutes inside a nightly window (so you never forget to start it).
+- **Quick Menu**: Right-click the menu bar icon to start a common timer, stop the current one, or open settings without opening the popover.
 - **Visual Feedback**: Circular progress ring and dynamic menu bar icons (moon/filled moon).
 
 ### 📷 Intelligent Sleep Detection
 - **Auto-Sleep**: Automatically starts a 30-minute timer when it detects your eyes are closed for ~15 seconds.
+- **Live Preview**: See the camera feed in the popover, with a border that turns green when your face is detected.
 - **Activity Check**: After 1.5 hours in camera mode, prompts you to confirm if you're still awake. If no response within 30 seconds, automatically puts the Mac to sleep.
 - **Privacy First**: All processing is done on-device using Apple's Vision Framework. No video data is stored or transmitted.
 - **Smart Wake**: Automatically cancels the pending timer if you open your eyes.
@@ -100,6 +102,8 @@ mv "Sleep Timer.app" /Applications/
    - Add more time if needed
    - Cancel the timer
 
+> **Quick actions**: Right-click the menu bar icon for a menu that starts a common timer (15m/30m/1h/1.5h/2h), stops the current one, or opens settings without opening the popover.
+
 ### Auto-Start When Idle
 1. Open Settings (the gear in the menu bar popover, or Cmd+,) and enable "Start a timer when the Mac is idle at night"
 2. Pick the window start and end hours, how many idle minutes should pass, and the timer length
@@ -110,7 +114,7 @@ mv "Sleep Timer.app" /Applications/
 1. Click the moon icon in your menu bar
 2. Select "Camera" mode at the top
 3. Grant camera permission when prompted
-4. The app will start tracking your eyes
+4. The app shows a live preview and starts tracking your eyes; the preview border turns green once your face is detected
 5. When your eyes are closed for ~15 seconds, a 30-minute timer starts automatically
 6. Open your eyes for a few seconds to cancel the timer
 7. Every 1.5 hours, you'll be asked if you're still awake
